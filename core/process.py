@@ -75,9 +75,9 @@ class Parser:
         self.dispatch("welp", "script", "Header extracted.", header_text)
 
         if result["name"]:
-            self.dispatch("welp", "script", "Name detected.", result["name"])
+            self.dispatch("found:name", "script", "Name detected.", result["name"])
         if result["dob"]:
-            self.dispatch("welp", "script", "DOB detected.", result["dob"])
+            self.dispatch("found:dob", "script", "DOB detected.", result["dob"])
 
         # extract sections
 
@@ -93,7 +93,7 @@ class Parser:
             },
             {
                 "name": "Group Exhibitions",
-                "keywords": ["group exhibition", "selected exhibition", "exhibitions"],
+                "keywords": ["group exhibition", "selected exhibition"],
                 "slug": "group_exhibitions",
             },
         ]
@@ -129,7 +129,7 @@ class Parser:
                 if time.strftime("%-m/%-d/%Y") in text:
                     continue
 
-                years = re.findall(r"(?:19|20)\d{2}", text)
+                years = re.findall(r"^(?:19|20)\d{2}", text)
 
                 if years:
                     year = years[0]
@@ -169,7 +169,7 @@ class Parser:
 
                 for x in range(exhibition_start_index, exhibition_end_index):
                     text = blocks[x]
-                    text = re.sub(r"(?:19|20)\d{2}", "", blocks[x]["Text"])
+                    text = re.sub(r"^(?:19|20)\d{2}", "", blocks[x]["Text"])
 
                     if not text:
                         continue

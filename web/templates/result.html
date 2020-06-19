@@ -11,6 +11,16 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/js/all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-compat/3.0.0-alpha1/jquery.min.js"></script>
   <title>Result</title>
+
+  <style>
+    .content {
+      margin: 2rem 0;
+    }
+
+    .content>div {
+      margin: 1rem 0;
+    }
+  </style>
 </head>
 
 <body>
@@ -50,13 +60,20 @@
 
           </div>
           <div class="content">
-            <div id="solo-exhibitions" style="margin:2rem 0;">
-              <b>Solo Exhibitions</b>: <span id="solo-exhibitions-count">0</span> found.
-              <ol></ol>
+            <div id="name">
+              <b>Name</b>: <span>Not found.</span>
             </div>
-            <div id="group-exhibitions" style="margin:2rem 0;">
+            <div id="dob">
+              <b>DOB</b>: <span>Not found.</span>
+            </div>
+
+            <div id="solo-exhibitions">
+              <b>Solo Exhibitions</b>: <span id="solo-exhibitions-count">0</span> found.
+              <ol style="list-style-type: none;"></ol>
+            </div>
+            <div id="group-exhibitions">
               <b>Group Exhibitions</b>: <span id="group-exhibitions-count">0</span> found.
-              <ol></ol>
+              <ol style="list-style-type: none;"></ol>
             </div>
           </div>
         </div>
@@ -81,6 +98,14 @@
     $("#job-status").text(status || "");
     $("#job-info").text(info || "");
 
+    // found name and dob
+    if (code === "found:name") {
+      $('#name > span').text(info)
+    }
+    if (code === "found:dob") {
+      $('#dob > span').text(info)
+    }
+
     // file details
     if (code === "save:file") {
       $('#s3-results').append(`<div style="font-size:0.75rem;margin: 1rem 0">CV location: <a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/${info}</a></div>`)
@@ -93,17 +118,19 @@
     }
 
 
+
+
     // exhibition found
     if (status === "Exhibition found.") {
       if (meta["type"] === "solo_exhibitions") {
-        $('#solo-exhibitions > ol').append(`<li>${meta["year"]}: ${info}</li>`)
+        $('#solo-exhibitions > ol').append(`<li>${meta["year"]}: <span style="background-color: yellow">${info}</span> ${meta["original"].replace(meta["title"], '')}</li>`)
 
         // update count
         const count = parseInt($("#solo-exhibitions-count").text())
         $("#solo-exhibitions-count").text(count + 1)
       }
       if (meta["type"] === "group_exhibitions") {
-        $('#group-exhibitions > ol').append(`<li>${meta["year"]}: ${info}</li>`)
+        $('#group-exhibitions > ol').append(`<li>${meta["year"]}: <span style="background-color: yellow">${info}</span> ${meta["original"].replace(meta["title"], '')}</li>`)
 
         // update count
         const count = parseInt($("#group-exhibitions-count").text())
