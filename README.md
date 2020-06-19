@@ -16,6 +16,8 @@
 2. Ranged dates are no handled. 2012-13, picks out -13
 3. The page header date watermarks by chrome print pdf is stopping from proceeding further.
 4. Add check if date is in between.
+5. Create a bucket if does not exist.
+6. IAM provide access only to one bucket.
 
 # CV Exception cases
 

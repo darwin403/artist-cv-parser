@@ -17,7 +17,8 @@ exhibition = ExtractExhibition()
 class Parser:
 
     # file locations
-    BUCKET = "artists-cvs"
+    # BUCKET = "artists-cvs"
+    BUCKET = "artex-staging"
 
     TMP_FILE = "tmp/{hash}.pdf"
     TEXTRACT_JSON = "tmp/{hash}.json"
