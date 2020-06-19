@@ -60,6 +60,9 @@
 
           </div>
           <div class="content">
+            <div id="hash">
+              <b>File hash</b>: <span>Not determined.</span>
+            </div>
             <div id="name">
               <b>Name</b>: <span>Not found.</span>
             </div>
@@ -97,6 +100,11 @@
 
     $("#job-status").text(status || "");
     $("#job-info").text(info || "");
+
+    // hash
+    if (code === "file:hash"){
+      $('#hash > span').text(info)
+    }
 
     // found name and dob
     if (code === "found:name") {

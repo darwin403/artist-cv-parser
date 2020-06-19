@@ -202,7 +202,7 @@ class Parser:
 
         # identify file uniquely by content
         file_hash = hashlib.md5(open(file_path, "rb").read()).hexdigest()
-        self.dispatch("welp", "hash", "File hash computed.", file_hash)
+        self.dispatch("file:hash", "hash", "File hash computed.", file_hash)
 
         file_temp = self.TMP_FILE.format(hash=file_hash)
 
