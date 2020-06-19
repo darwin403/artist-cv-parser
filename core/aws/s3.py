@@ -1,8 +1,15 @@
-import boto3
 from pathlib import Path
+
+import boto3
 from botocore.errorfactory import ClientError
 
-s3 = boto3.client("s3")
+from core.aws.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+)
 
 
 def upload_text(text, bucket, object_name):
@@ -32,7 +39,7 @@ def upload_file(file_path, bucket, object_name=None):
     # If S3 object_name was not specified, use file_path
     if object_name is None:
         object_name = Path(file_path).name
-    
+
     # Convert paths to string
     file_path = str(file_path)
     object_name = str(object_name)

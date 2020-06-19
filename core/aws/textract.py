@@ -1,8 +1,16 @@
-import boto3
 import time
-from math import sqrt, ceil
+from math import ceil, sqrt
 
-client = boto3.client("textract", region_name="us-east-1")
+import boto3
+
+from core.aws.config import AWS_ACCESS_KEY_ID, AWS_DEFAULT_REGION, AWS_SECRET_ACCESS_KEY
+
+client = boto3.client(
+    "textract",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_DEFAULT_REGION,
+)
 
 
 def log(service, message, meta=None):
