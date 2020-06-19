@@ -37,10 +37,21 @@ def hello():
 
 @socketio.on("job:start")
 def job_start(filename):
+    filepath = (UPLOAD_FOLDER / filename).absolute()
+
+    # check if file exists
+    if not os.path.isfile(filepath):
+        emit("job:message", "%s does not exist." % filename)
+        return
+
     parser = Parser(emit=emit)
-    parser.process_cv((UPLOAD_FOLDER / filename).absolute())
+    parser.process_cv(filepath)
+
+    # remove file after processing
+    os.remove(filepath)
+    emit("job:message", "%s job completed." % filename)
 
 
 if __name__ == "__main__":
     # app.run(debug=True, threaded=False)
-    socketio.run(app, debug=True,port=1234)
+    socketio.run(app, debug=True, port=1234)

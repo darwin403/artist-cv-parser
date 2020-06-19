@@ -221,6 +221,9 @@ class Parser:
         if not exists_file(bucket=self.BUCKET, object_name=file_textract):
             self.dispatch("welp", "textract", "OCR does not exist in s3 bucket.")
 
+            # ! This dispatch can be removed
+            self.dispatch("welp", "textract", "Textract is detecting text...")
+
             blocks = process_file(bucket=self.BUCKET, object_name=file_temp)
             self.dispatch("welp", "textract", "OCR text processed.")
 
