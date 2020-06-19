@@ -41,8 +41,7 @@
         </div>
         <div class="column">
           <h1 class="title" id="header">
-            <!-- <i class="fas fa-spinner fa-spin" style="font-size:20px;margin-right: 1rem"></i> -->
-            Processing CV ...
+            Waiting for backend...
           </h1>
           <p class="subtitle">
             <span id="job-status"></span>
@@ -70,6 +69,10 @@
   var socket = io();
   socket.on("connect", function () {
     socket.emit("job:start", "{{filename}}");
+
+    // update status
+    $('#header').text('Processing CV ...')
+
   });
   socket.on("job:message", function (message) {
 
