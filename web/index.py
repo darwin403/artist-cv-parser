@@ -11,7 +11,7 @@ from core.process import Parser
 UPLOAD_FOLDER = Path(__file__).parent / "static/uploads"
 
 # create upload folder if does not exist
-if not os.path.exists(UPLOAD_FOLDER):
+if not os.path.isdir(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
@@ -54,4 +54,4 @@ def job_start(filename):
 
 if __name__ == "__main__":
     # app.run(debug=True, threaded=False)
-    socketio.run(app, debug=True, port=1234)
+    socketio.run(app, debug=True)
