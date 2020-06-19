@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
+  <link rel="shortcut icon" href="http://www.iconj.com/ico/l/q/lq2fojs3h6.ico" type="image/x-icon" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/js/all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-compat/3.0.0-alpha1/jquery.min.js"></script>
+  <title>Result</title>
+</head>
+
+<body>
+  <nav class="bd-navbar navbar has-shadow is-spaced is-info">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+          Art Prizes
+        </a>
+        <span class="navbar-burger burger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+    </div>
+  </nav>
+  <section class="section">
+
+    <div class="container">
+      <div class="columns is-variable is-8">
+        <div class="column">
+          <div class="box">
+
+            <embed src="/static/uploads/{{ filename }}" style="width: 100%; height: 100%; min-height: 640px;"
+              type="application/pdf" />
+          </div>
+        </div>
+        <div class="column">
+          <h1 class="title" id="header">
+            <!-- <i class="fas fa-spinner fa-spin" style="font-size:20px;margin-right: 1rem"></i> -->
+            Processing CV ...
+          </h1>
+          <p class="subtitle">
+            <span id="job-status"></span>
+          </p>
+          <div id="s3-results">
+
+          </div>
+          <div class="content">
+            <div id="solo-exhibitions" style="margin:2rem 0;">
+              <b>Solo Exhibitions</b>: <span id="solo-exhibitions-count">0</span> found.
+              <ol></ol>
+            </div>
+            <div id="group-exhibitions" style="margin:2rem 0;">
+              <b>Group Exhibitions</b>: <span id="group-exhibitions-count">0</span> found.
+              <ol></ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+<script>
+  var socket = io();
+  socket.on("connect", function () {
+    socket.emit("job:start", "{{filename}}");
+  });
+  socket.on("job:message", function (message) {
+
+    const { code, status, info, meta } = message;
+
+    $("#job-status").text(status || "");
+    $("#job-info").text(info || "");
+
+    // file details
+    if (code === "save:file") {
+      $('#s3-results').append(`<div style="font-size:0.75rem;margin: 1rem 0">CV location: <a href="https://artists-cvs.s3.amazonaws.com/${info}" target="_blank">https://artists-cvs.s3.amazonaws.com/${info}</a></div>`)
+    }
+    if (code === "save:textract") {
+      $('#s3-results').append(`<div style="font-size:0.75rem;margin: 1rem 0">Textract location: <a href="https://artists-cvs.s3.amazonaws.com/${info}" target="_blank">https://artists-cvs.s3.amazonaws.com/${info}</a></div>`)
+    }
+    if (code === "save:result") {
+      $('#s3-results').append(`<div style="font-size:0.75rem;margin: 1rem 0">Result location: <a href="https://artists-cvs.s3.amazonaws.com/${info}" target="_blank">https://artists-cvs.s3.amazonaws.com/${info}</a></div>`)
+    }
+
+
+    // exhibition found
+    if (status === "Exhibition found.") {
+      if (meta["type"] === "solo_exhibitions") {
+        $('#solo-exhibitions > ol').append(`<li>${meta["year"]}: ${info}</li>`)
+
+        // update count
+        const count = parseInt($("#solo-exhibitions-count").text())
+        $("#solo-exhibitions-count").text(count + 1)
+      }
+      if (meta["type"] === "group_exhibitions") {
+        $('#group-exhibitions > ol').append(`<li>${meta["year"]}: ${info}</li>`)
+
+        // update count
+        const count = parseInt($("#group-exhibitions-count").text())
+        $("#group-exhibitions-count").text(count + 1)
+      }
+    }
+
+    // job completed
+    if (code === "done") {
+      $("#header").html('<i class="fas fa-check-circle" style="color: green;"></i> Success!')
+    }
+    console.log(message);
+  });
+</script>
+
+</html>

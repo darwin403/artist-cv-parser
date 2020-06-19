@@ -1,0 +1,19 @@
+Project URL: https://www.freelancer.com/projects/amazon-web-services/AWS-Textract-similar
+
+Title: AWS Textract or similar
+
+Description:
+
+Hi, I'm looking for someone to build me a method of parsing cvs, preferably using Textract but other options considered. It has to be able to parse out specific information related to artists. The other option is to use Apache Tika. You need to be experienced with AWS. I'm open to page scraping technology as well. Either way, you will need to be AWS certified because this has to go on to my production server at some point in the future.
+
+1. If you are interested let me know
+2. I will send you the briefing document.
+3. Send me your solution. It isn't really helpful to just say "I can do it". I want to know how you will complete this job and what technology you think will give the best results. How many hours you estimate it will take to work out the parsing. How will you use the AWS environment and what will you need to setup.
+4. If you quote above the range then you probably won't get the gig unless you can show how your solution is neat and brilliant.
+
+The required output at the end of this is to be able to identify the exhibition details for the given artist. You need to extract in the following format:
+<YYYY> - <exhibition title>, <exhibition venue>, <exhibition city>
+
+Start with 6 example pages that I supply to you. You use your infrastructure and just send me the results as a csv. If that looks good we can then go to the next stage.
+
+Thanks for your interest.
