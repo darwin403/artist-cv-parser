@@ -222,7 +222,11 @@ class Parser:
             self.dispatch("welp", "textract", "OCR does not exist in s3 bucket.")
 
             # ! This dispatch can be removed
-            self.dispatch("welp", "textract", "Textract is detecting text...")
+            self.dispatch(
+                "welp",
+                "textract",
+                "Textract is detecting text. This can take some time...",
+            )
 
             blocks = process_file(bucket=self.BUCKET, object_name=file_temp)
             self.dispatch("welp", "textract", "OCR text processed.")

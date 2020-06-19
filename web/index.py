@@ -54,4 +54,4 @@ def job_start(filename):
 
 if __name__ == "__main__":
     # app.run(debug=True, threaded=False)
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=False)
