@@ -93,8 +93,7 @@ def job_start(job):
     # save user info
     meta = {
         "input": {"name": job.get("name"), "email": job.get("email")},
-        "ip": request.remote_addr,
-        "lol": request.environ['REMOTE_ADDR']
+        "ip": request.environ["REMOTE_ADDR"],
     }
 
     # parse cv
