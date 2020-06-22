@@ -75,6 +75,12 @@ head %}
 </style>
 {% endblock %} {% block js %}
 <script>
+  // found atleast one exhibition
+  let found = false;
+
+  // socketio instance
+  const socket = io();
+
   // get ip adress
   function get_ip(){
     const response = $.ajax({
@@ -82,6 +88,7 @@ head %}
         url: "https://www.cloudflare.com/cdn-cgi/trace",
         async: false
     }).responseText;
+    
     const regex = new RegExp(/^ip=(.*)$/, "m");
     
     // ip not found
@@ -89,11 +96,8 @@ head %}
 
     return regex.exec(response)[1]
   }
-  // found atleast one exhibition
-  let found = false;
 
-  // socketio instance
-  const socket = io();
+  
 
   // socketio connected
   socket.on("connect", function () {
