@@ -213,7 +213,6 @@ class Parser:
             "ip": self.meta.get("ip"),
             "createdAt": now,
             "parsedAt": now,
-            "updatedAt": now,
         }
 
         # identify file uniquely by content
@@ -266,7 +265,6 @@ class Parser:
         self.dispatch("welp", "script", "Processing CV completed.")
 
         # update timestamps
-        meta["updatedAt"] = self.now()
         meta["parsedAt"] = self.now()
 
         # append meta

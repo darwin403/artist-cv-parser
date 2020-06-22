@@ -53,8 +53,10 @@ css %}
 <script>
 $(document).ready(function(){
   $('form').submit(function(){
-    const url = $('input[name="url"]');
+    const name = $('input[name="name"]');
+    const email = $('input[name="email"]');
     const cv = $('input[name="cv"]');
+    const url = $('input[name="url"]');
 
     // highlight missing upload or web field
     if (!url.val() && !cv.val()){
@@ -63,8 +65,22 @@ $(document).ready(function(){
        url.removeClass("is-danger");
     }
 
+    // highlight missing name
+    if (!name.val()){
+      name.addClass("is-danger");
+    } else {
+      name.removeClass("is-danger")
+    }
+
+    // highlight missing email
+    if (!email.val()){
+      email.addClass("is-danger");
+    } else {
+      email.removeClass("is-danger")
+    }
+
     // form status
-    const isValid = url.val() || cv.val()
+    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val())
 
     return isValid;
   })
