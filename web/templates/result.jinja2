@@ -1,0 +1,320 @@
+{% extends "base.jinja2" %} {% block title %} Result {% endblock %} {% block
+head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+{% endblock %} {% block css %}
+<style>
+  .status {
+      margin-bottom: 1rem;
+  }
+
+  .results-parsed-title,.results-saved-title {
+      margin-bottom:3rem;
+      padding-left:0.75rem;text-align:center;
+      font-weight: bold;
+      color: #7a7a7a;
+      font-weight: normal;
+  }
+
+
+  ol.exhibitions {
+      margin-left: 0.75rem;
+      list-style-type: none;
+  }
+  ol.exhibitions > li {
+      font-size: 0.75rem;
+  }
+
+  td {
+      border: 0 !important;
+  }
+
+  .artist-solo-exhibitions-list, .artist-group-exhibitions-list {
+      visibility: collapse;
+  }
+
+
+  .placeholder {
+      background: hsl(0, 0%, 91%) !important;
+      color: transparent;
+  }
+
+  .highlight {
+      background-color:yellow;
+  }
+
+  .file-location tr > td:nth-child(2) {
+      vertical-align:middle;
+      {# font-size: 12px; #}
+  }
+
+  .loading {
+  font-size: 30px;
+  }
+
+  .loading:after {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  -webkit-animation: ellipsis steps(4,end) 900ms infinite;
+  animation: ellipsis steps(4,end) 900ms infinite;
+  content: "\2026"; /* ascii code for the ellipsis character */
+  width: 0px;
+  }
+
+  @keyframes ellipsis {
+  to {
+      width: 1.25em;
+  }
+  }
+
+  @-webkit-keyframes ellipsis {
+  to {
+      width: 1.25em;
+  }
+  }
+</style>
+{% endblock %} {% block js %}
+<script>
+  // found atleast one exhibition
+  let found = false;
+
+  // socketio instance
+  const socket = io();
+
+  // socketio connected
+  socket.on("connect", function () {
+    socket.emit("job:start", {
+      filename: {{ filename|tojson|safe }}, 
+      name: {{ name|tojson|safe }}, 
+      dob: {{ dob|tojson|safe }}
+    });
+
+    // update status-title
+    $(".status-title").html('<div class="loading">Processing CV</div>');
+  });
+
+  // socketio message
+  socket.on("job:message", function (message) {
+    console.log(message);
+
+    const { code, service, status, info, meta } = message;
+
+    // update status-subtitle
+    $(".status-subtitle").text(status || "");
+
+    // file hash
+    if (code === "file:hash") {
+      $(".artist-hash > td:nth-child(2)").text(info);
+    }
+
+    // found name and dob
+    if (code === "artist:name") {
+      $(".artist-name > td:nth-child(2)").text(info || "Not found.");
+    }
+    if (code === "artist:dob") {
+      $(".artist-dob > td:nth-child(2)").text(info || "Not found.");
+    }
+
+    // exhibition found
+    if (code === "artist:exhibition") {
+      found = true;
+
+      if (meta.type === "solo_exhibitions") {
+        console.log(info);
+        // hide placeholder and show exhibitions
+        $(".artist-solo-exhibitions  > td:nth-child(2)").text("");
+        $(".artist-solo-exhibitions-list").css("visibility", "initial");
+
+        // append exhibiton
+        $(".artist-solo-exhibitions-list ol").append(
+          `<li>${
+            meta.year
+          }: <span class="highlight">${info}</span> ${meta.original.replace(
+            meta.title,
+            ""
+          )}</li>`
+        );
+      }
+      if (meta.type === "group_exhibitions") {
+        // hide placeholder and show exhibitions
+        $(".artist-group-exhibitions  > td:nth-child(2)").text("");
+        $(".artist-group-exhibitions-list").css("visibility", "initial");
+
+        // append exhibition
+        $(".artist-group-exhibitions-list ol").append(
+          `<li>${
+            meta.year
+          }: <span class="highlight">${info}</span> ${meta.original.replace(
+            meta.title,
+            ""
+          )}</li>`
+        );
+      }
+    }
+
+    // file details
+    if (code === "saved:cv") {
+      $(".file-location-cv > td:nth-child(2)").html(
+        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../cv.pdf</a>`
+      );
+    }
+    if (code === "saved:textract") {
+      $(".file-location-textract > td:nth-child(2)").html(
+        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../textract.json</a>`
+      );
+    }
+    if (code === "saved:parsed") {
+      $(".file-location-parsed > td:nth-child(2)").html(
+        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../parsed.json</a>`
+      );
+    }
+  });
+
+  // socketio close
+  socket.on("job:done", function (message) {
+    const { status } = message;
+
+    // update status-subtitle
+    $(".status-subtitle").text(status || "");
+
+    // update title
+    if (found) {
+      $(".status-title").html(
+        '<i class="fas fa-check-circle" style="color: green; margin-right:1rem;"></i> Success!'
+      );
+    } else {
+      $(".status-title").html(
+        '<i class="fas fa-times-circle" style="color: red; margin-right:1rem;"></i> Failed!'
+      );
+    }
+
+    // update exhbitions
+    if ($(".artist-solo-exhibitions-list ol").is(':empty')){
+        $(".artist-solo-exhibitions > td:nth-child(2)").text("Not found.")
+    }
+
+    if ($(".artist-group-exhibitions-list ol").is(':empty')){
+        $(".artist-group-exhibitions > td:nth-child(2)").text("Not found.")
+    }
+
+    // close
+    socket.disconnect();
+  });
+</script>
+{% endblock %} {% block body %}
+<nav class="bd-navbar navbar has-shadow is-spaced is-info">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="/">
+        Artex
+      </a>
+      <span class="navbar-burger burger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column">
+        <div class="status">
+          <h1 class="status-title title">
+            <span class="loading">Waiting for backend</span>
+          </h1>
+          <p class="subtitle">
+            Status:
+            <span class="status-subtitle"
+              >Your file is queued for processing.</span
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-variable is-8">
+      <div class="column">
+        <div class="upload">
+          <div class="upload-pdf">
+            <embed
+              src="{{ url_for('static', filename='uploads/%s' % filename) }}"
+              style="width: 100%; height: 100%; min-height: 1640px;"
+              type="application/pdf"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="results">
+          <div class="results-parsed box">
+            <div class="results-parsed-title">
+              ARTIST DETAILS
+            </div>
+            <table class="artist table is-fullwidth">
+              <tbody>
+                <tr class="artist-hash">
+                  <td><b>Hash</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="artist-name">
+                  <td><b>Name</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="artist-dob">
+                  <td><b>DOB</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="artist-solo-exhibitions">
+                  <td><b>Solo Exhibitions</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="artist-solo-exhibitions-list">
+                  <td colspan="2">
+                    <ol class="exhibitions"></ol>
+                  </td>
+                </tr>
+                <tr class="artist-group-exhibitions">
+                  <td><b>Group Exhibitions</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="artist-group-exhibitions-list">
+                  <td colspan="2">
+                    <ol class="exhibitions"></ol>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="results-saved box">
+            <div class="results-saved-title">
+              EXTRATION DETAILS
+            </div>
+            <table class="file-location table is-fullwidth">
+              <tbody>
+                <tr class="file-location-cv">
+                  <td><b>CV</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="file-location-textract">
+                  <td><b>Textract</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="file-location-parsed">
+                  <td><b>Parsed</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="content"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}}

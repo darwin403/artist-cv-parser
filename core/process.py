@@ -27,8 +27,9 @@ class Parser:
     TEXTRACT_FILE = "cvs/{name}/textract.json"
     PARSED_JSON = "cvs/{name}/parsed.json"
 
-    def __init__(self, emit=None):
+    def __init__(self, artist={}, emit=None):
         self.emit = emit
+        self.artist = artist
 
     def dispatch(self, code, service, status, info=None, meta=None):
         result = {
@@ -48,8 +49,8 @@ class Parser:
 
     def process_blocks(self, blocks):
         result = {
-            "name": None,
-            "dob": None,
+            "name": self.artist.get("name"),
+            "dob": self.artist.get("dob"),
             "solo_exhibitions": [],
             "group_exhibitions": [],
         }
@@ -62,22 +63,24 @@ class Parser:
 
         header_text = ""
 
-        # extract name and dob
+        # extract header text
         for b in blocks:
             if len(header_text) >= 500:
                 break
 
             header_text += b.get("Text", "") + ". "
 
-        result["name"] = ExtractName(header_text)
-        result["dob"] = ExtractBirthday(header_text)
-
         self.dispatch("welp", "script", "Header extracted.", header_text)
 
-        if result["name"]:
-            self.dispatch("found:name", "script", "Name detected.", result["name"])
-        if result["dob"]:
-            self.dispatch("found:dob", "script", "DOB detected.", result["dob"])
+        # extract name
+        if result["name"] is None:
+            result["name"] = ExtractName(header_text)
+        self.dispatch("artist:name", "script", "Name detected.", result["name"])
+
+        # extract dob
+        if result["dob"] is None:
+            result["dob"] = ExtractBirthday(header_text)
+        self.dispatch("artist:dob", "script", "DOB detected.", result["dob"])
 
         # extract sections
 
@@ -123,10 +126,6 @@ class Parser:
                     )
 
                 if not section_found:
-                    continue
-
-                # chrome print page fix
-                if time.strftime("%-m/%-d/%Y") in text:
                     continue
 
                 years = re.findall(r"^(?:19|20)\d{2}", text)
@@ -187,9 +186,9 @@ class Parser:
 
                     if title:
                         self.dispatch(
-                            "welp",
-                            "script",
-                            "Exhibition found.",
+                            "artist:exhibition",
+                            "comprehend",
+                            "Found exhibition: %s" % title,
                             title,
                             exhibition_result,
                         )
@@ -225,7 +224,7 @@ class Parser:
             self.dispatch(
                 "welp",
                 "textract",
-                "Textract is detecting text. This can take some time...",
+                "Textract is detecting text. This might take a few mintutes.",
             )
 
             blocks = process_file(bucket=self.BUCKET, object_name=file_temp)
@@ -260,26 +259,26 @@ class Parser:
 
         # save result
         upload_file(file_path=file_path, bucket=self.BUCKET, object_name=file_original)
-        self.dispatch("save:file", "s3", "CV uploaded to s3 bucket.", file_original)
-
-        upload_text(
-            text=json.dumps(result), bucket=self.BUCKET, object_name=file_parsed
-        )
-        self.dispatch(
-            "save:result", "s3", "Processed result uploaded to s3 bucket.", file_parsed
-        )
+        self.dispatch("saved:cv", "s3", "CV uploaded to s3 bucket.", file_original)
 
         upload_text(
             text=json.dumps(blocks), bucket=self.BUCKET, object_name=file_textract
         )
         self.dispatch(
-            "save:textract",
+            "saved:textract",
             "s3",
             "Textract result uploaded to s3 bucket.",
             file_textract,
         )
 
-        self.dispatch("done", "script", "Processing complete.")
+        upload_text(
+            text=json.dumps(result), bucket=self.BUCKET, object_name=file_parsed
+        )
+        self.dispatch(
+            "saved:parsed", "s3", "Processed result uploaded to s3 bucket.", file_parsed
+        )
+
+        self.dispatch("script:done", "script", "Processing CV complete.")
 
         return result
 

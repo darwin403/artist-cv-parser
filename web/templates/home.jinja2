@@ -1,0 +1,169 @@
+{% extends "base.jinja2" %} {% block title %} Welcome {% endblock %} {% block
+css %}
+<style>
+  .subtitle {
+    color: rgba(255,255,255,.6) !important;
+  }
+  form {
+    margin: 0 auto;
+    min-width: 250px;
+    max-width: 400px;
+  }
+  form .field {
+    margin: 0.5rem 0;
+  }
+
+  form .control .icon {
+    color: #4a4a4a !important;
+  }
+
+  form .field button {
+    margin-top: 3rem;
+  }
+
+  .is-divider {
+    display: block;
+    position: relative;
+    border-top: 0.1rem solid rgba(255, 255, 255, 0.3);
+    height: 0.1rem;
+    margin: 2rem 0;
+    text-align: center;
+  }
+
+  .is-divider::after {
+    background: #3298dc;
+    color: #fff;
+    content: attr(data-content);
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    -webkit-transform: translateY(-1.1rem);
+    -ms-transform: translateY(-1.1rem);
+    transform: translateY(-1.1rem);
+    text-align: center;
+  }
+
+  .flex-grow {
+    flex-grow: 1;
+  }
+</style>
+{% endblock %} 
+
+{% block js %}
+<script>
+$(document).ready(function(){
+  $('form').submit(function(){
+    const url = $('input[name="url"]');
+    const cv = $('input[name="cv"]');
+
+    // highlight missing upload or web field
+    if (!url.val() && !cv.val()){
+      url.addClass("is-danger");
+    } else {
+       url.removeClass("is-danger");
+    }
+
+    // form status
+    const isValid = url.val() || cv.val()
+
+    return isValid;
+  })
+
+  $('input[type="file"]').change(function(e){
+    const filename = e.target.files.length ? e.target.files[0].name : "";
+    
+    // update file name
+    $(".file-name").text(filename);
+  })
+})
+</script>
+{% endblock %}
+
+{% block body %}
+<section class="hero is-info is-fullheight">
+  <div class="hero-head">
+    <nav class="navbar is-spaced">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            Artex
+          </a>
+          <span class="navbar-burger burger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <p class="title">
+        Process a Artist CV
+      </p>
+      <p class="subtitle">
+        Test with
+        <a
+          href="{{ url_for('process', filename='marc.pdf') }}"
+          target="new"
+          style="text-decoration: underline;"
+          >Sample 1</a
+        >
+        and
+        <a
+          href="{{ url_for('process', filename='michael.pdf') }}"
+          target="new"
+          style="text-decoration: underline;"
+          >Sample 2</a
+        >
+      </p>
+      <form method="post" action="{{ url_for('save') }}" enctype="multipart/form-data">
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input" type="text" name="name" placeholder="Artist Name" />
+            <span class="icon is-small is-left">
+              <i class="fas fa-user"></i>
+            </span>
+          </p>
+        </div>
+        <div class="field">
+          <div class="file has-name is-right">
+            <label class="file-label flex-grow">
+              <input class="file-input" type="file" name="cv">
+              <span class="file-cta">
+                <span class="file-icon">
+                  <i class="fas fa-upload"></i>
+                </span>
+                <span class="file-label">
+                  Upload a CV
+                </span>
+              </span>
+              <span class="file-name flex-grow">
+                My_resume.pdf
+              </span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="is-divider" data-content="OR"></div>
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input" type="text" name="url" placeholder="http://melissasmith.net.au/cv.html" />
+            <span class="icon is-small is-left">
+              <i class="fas fa-globe"></i>
+            </span>
+          </p>
+        </div>
+        <div class="field">
+          <div class="control">
+            <button class="button is-dark is-fullwidth">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}}
