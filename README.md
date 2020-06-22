@@ -12,6 +12,7 @@
 
 # Todo
 
+0. Logo - Art Biogs
 1. Check if part of the ending string is a location
 2. Ranged dates are no handled. 2012-13, picks out -13
 3. The page header date watermarks by chrome print pdf is stopping from proceeding further.
@@ -22,6 +23,7 @@
 8. Stop script/job if user closes window
 9. Make it mobile responsive.
 10. Review file permissions.
+11. Change region
 
 # CV Exception cases
 
