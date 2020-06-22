@@ -5,6 +5,7 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor as PoolExecutor
 import sys
+import datetime
 
 from core.aws.s3 import exists_file, read_file, upload_file, upload_text
 from core.aws.comprehend import ExtractBirthday, ExtractName, ExtractExhibition
@@ -27,9 +28,12 @@ class Parser:
     TEXTRACT_FILE = "cvs/{name}/textract.json"
     PARSED_JSON = "cvs/{name}/parsed.json"
 
-    def __init__(self, artist={}, emit=None):
-        self.emit = emit
-        self.artist = artist
+    def __init__(self, **config):
+        self.emit = config.get("emit", None)
+        self.meta = config.get("meta", {})
+
+    def now(self):
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def dispatch(self, code, service, status, info=None, meta=None):
         result = {
@@ -48,9 +52,11 @@ class Parser:
         print(result)
 
     def process_blocks(self, blocks):
+
+        # default result
         result = {
-            "name": self.artist.get("name"),
-            "dob": self.artist.get("dob"),
+            "name": None,
+            "dob": None,
             "solo_exhibitions": [],
             "group_exhibitions": [],
         }
@@ -73,13 +79,11 @@ class Parser:
         self.dispatch("welp", "script", "Header extracted.", header_text)
 
         # extract name
-        if result["name"] is None:
-            result["name"] = ExtractName(header_text)
+        result["name"] = ExtractName(header_text)
         self.dispatch("artist:name", "script", "Name detected.", result["name"])
 
         # extract dob
-        if result["dob"] is None:
-            result["dob"] = ExtractBirthday(header_text)
+        result["dob"] = ExtractBirthday(header_text)
         self.dispatch("artist:dob", "script", "DOB detected.", result["dob"])
 
         # extract sections
@@ -198,6 +202,19 @@ class Parser:
         return result
 
     def process_cv(self, file_path):
+        now = self.now()
+
+        # cv meta
+        meta = {
+            "input": {
+                "name": self.meta.get("input", {}).get("name"),
+                "email": self.meta.get("input", {}).get("email"),
+            },
+            "ip": self.meta.get("ip"),
+            "createdAt": now,
+            "parsedAt": now,
+            "updatedAt": now,
+        }
 
         # identify file uniquely by content
         file_hash = hashlib.md5(open(file_path, "rb").read()).hexdigest()
@@ -248,6 +265,13 @@ class Parser:
         result = self.process_blocks(blocks)
         self.dispatch("welp", "script", "Processing CV completed.")
 
+        # update timestamps
+        meta["updatedAt"] = self.now()
+        meta["parsedAt"] = self.now()
+
+        # append meta
+        result["meta"] = meta
+
         folder_name = (
             "{name} ({hash})".format(name=result["name"], hash=file_hash)
             if result["name"]
@@ -286,4 +310,3 @@ class Parser:
 if __name__ == "__main__":
     parser = Parser()
     parser.process_cv(sys.argv[1])
-    # print(results)

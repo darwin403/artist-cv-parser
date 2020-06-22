@@ -53,14 +53,14 @@ def save():
 
     # get artist info
     name = request.form.get("name")
-    dob = request.form.get("dob")
+    email = request.form.get("email")
 
     return redirect(
         url_for(
             "process",
             filename=filename,
             name=name if name else None,
-            dob=dob if dob else None,
+            email=email if email else None,
         )
     )
 
@@ -70,9 +70,9 @@ def save():
 def process(filename):
     # get artist info
     name = request.args.get("name")
-    dob = request.args.get("dob")
+    email = request.args.get("email")
 
-    return render_template("result.jinja2", filename=filename, name=name, dob=dob)
+    return render_template("result.jinja2", filename=filename, name=name, email=email)
 
 
 # Declare socket
@@ -90,11 +90,14 @@ def job_start(job):
         emit("job:done", {"status": "%s does not exist." % filename})
         return
 
-    # load artist info
-    artist = {"name": job.get("name"), "dob": job.get("dob")}
+    # save user info
+    meta = {
+        "input": {"name": job.get("name"), "email": job.get("email")},
+        "ip": request.remote_addr,
+    }
 
     # parse cv
-    parser = Parser(artist=artist, emit=emit)
+    parser = Parser(meta=meta, emit=emit)
     parser.process_cv(filepath)
 
     # file processing done

@@ -6,6 +6,9 @@
 
 # Install
 
+1. Google-Chrome is required.
+2. For heroku, Install google-chrome buildpack on heroku: `https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-google-chrome`
+
 # Usage
 
 # Features
@@ -28,12 +31,10 @@
 # CV Exception cases
 
 1. "Solo Exhibitions" make not be the right marker. In this [example](https://annaglynn.com/cv.html), it is named as "Major Exhibitions" instead. Here is [another example](http://pennymason.com.au/cv) where its named "One Person Exhibitions"
-2. The year and the corresponding text may be detected together [as one string](https://annaglynn.com/cv.html), rather than separate chunks. 
+2. The year and the corresponding text may be detected together [as one string](https://annaglynn.com/cv.html), rather than separate chunks.
 3. Remove titles with less than 5 characters - Martin.
 
 # Web interface
 
 - Handle bad file types.
 - Remove file after it has been processed.
-
-

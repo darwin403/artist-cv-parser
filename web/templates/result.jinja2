@@ -86,7 +86,7 @@ head %}
     socket.emit("job:start", {
       filename: {{ filename|tojson|safe }}, 
       name: {{ name|tojson|safe }}, 
-      dob: {{ dob|tojson|safe }}
+      email: {{ email|tojson|safe }}
     });
 
     // update status-title
@@ -120,7 +120,6 @@ head %}
       found = true;
 
       if (meta.type === "solo_exhibitions") {
-        console.log(info);
         // hide placeholder and show exhibitions
         $(".artist-solo-exhibitions  > td:nth-child(2)").text("");
         $(".artist-solo-exhibitions-list").css("visibility", "initial");
