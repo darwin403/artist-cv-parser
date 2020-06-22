@@ -75,7 +75,20 @@ head %}
 </style>
 {% endblock %} {% block js %}
 <script>
-  console.log("{{ip}}")
+  // get ip adress
+  function get_ip(){
+    const response = $.ajax({
+        type: "GET",
+        url: "https://www.cloudflare.com/cdn-cgi/trace",
+        async: false
+    }).responseText;
+    const regex = new RegExp(/^ip=(.*)$/, "m");
+    
+    // ip not found
+    if (!regex.test(response)) return null;
+
+    return regex.exec(response)[1]
+  }
   // found atleast one exhibition
   let found = false;
 
@@ -87,7 +100,8 @@ head %}
     socket.emit("job:start", {
       filename: {{ filename|tojson|safe }}, 
       name: {{ name|tojson|safe }}, 
-      email: {{ email|tojson|safe }}
+      email: {{ email|tojson|safe }},
+      ip: get_ip(),
     });
 
     // update status-title
