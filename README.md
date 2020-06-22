@@ -7,7 +7,7 @@
 # Install
 
 1. Google-Chrome is required, wktohtl
-2. For heroku, Install google-chrome buildpack on heroku: `https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-google-chrome`. wktohtml also `https://github.com/simplefractal/heroku-buildpack-wkhtmltopdf.git`
+2. For heroku, Install google-chrome buildpack on heroku: `https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-google-chrome`. wktohtml also `https://github.com/chap/wkhtmltopdf-heroku-18-buildpack`
 
 # Usage
 
