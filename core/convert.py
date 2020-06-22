@@ -58,7 +58,7 @@ def html2pdf(html, path):
 
     # decide wkhtmltopdf path
     if WKHTMLTOPDF_PATH:
-        configuration = pdfkit.configuration(wkhtmltopdf="/opt/bin/wkhtmltopdf")
+        configuration = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
     else:
         configuration = pdfkit.configuration()
 
