@@ -10,6 +10,7 @@ import datetime
 from core.aws.s3 import exists_file, read_file, upload_file, upload_text
 from core.aws.comprehend import ExtractBirthday, ExtractName, ExtractExhibition
 from core.aws.textract import process_file
+from core.convert import data2pdf
 
 
 exhibition = ExtractExhibition()
@@ -27,6 +28,7 @@ class Parser:
     ORIGINAL_FILE = "cvs/{name}/cv.pdf"
     TEXTRACT_FILE = "cvs/{name}/textract.json"
     PARSED_JSON = "cvs/{name}/parsed.json"
+    PARSED_PDF = "cvs/{name}/parsed.pdf"
 
     def __init__(self, **config):
         self.emit = config.get("emit", None)
@@ -206,8 +208,9 @@ class Parser:
 
         # cv meta
         meta = {
+            "hash": None,
             "input": {
-                "name": self.meta.get("input", {}).get("name"),
+                "name": self.meta.get("input", {}).get("name", "").title() or None,
                 "email": self.meta.get("input", {}).get("email"),
             },
             "ip": self.meta.get("ip"),
@@ -217,6 +220,7 @@ class Parser:
 
         # identify file uniquely by content
         file_hash = hashlib.md5(open(file_path, "rb").read()).hexdigest()
+        meta["hash"] = file_hash
         self.dispatch("file:hash", "hash", "File hash computed.", file_hash)
 
         file_temp = self.TMP_FILE.format(hash=file_hash)
@@ -270,34 +274,58 @@ class Parser:
         # append meta
         result["meta"] = meta
 
+        # save parsed pdf
+        parsed_path = Path(file_path).parent / (Path(file_path).stem + "-parsed.pdf")
+        data2pdf(result, parsed_path)
+
+        # s3 object names
         folder_name = (
-            "{name} ({hash})".format(name=result["name"], hash=file_hash)
+            ("{hash} ({name})".format(name=result["name"], hash=file_hash))
             if result["name"]
             else file_hash
         )
+
         file_original = self.ORIGINAL_FILE.format(name=folder_name)
-        file_parsed = self.PARSED_JSON.format(name=folder_name)
         file_textract = self.TEXTRACT_FILE.format(name=folder_name)
+        file_parsed_json = self.PARSED_JSON.format(name=folder_name)
+        file_parsed_pdf = self.PARSED_PDF.format(name=folder_name)
 
-        # save result
+        # upload original file
         upload_file(file_path=file_path, bucket=self.BUCKET, object_name=file_original)
-        self.dispatch("saved:cv", "s3", "CV uploaded to s3 bucket.", file_original)
+        self.dispatch("uploaded:cv", "s3", "CV uploaded to s3 bucket.", file_original)
 
+        # upload textract result
         upload_text(
             text=json.dumps(blocks), bucket=self.BUCKET, object_name=file_textract
         )
         self.dispatch(
-            "saved:textract",
+            "uploaded:textract",
             "s3",
             "Textract result uploaded to s3 bucket.",
             file_textract,
         )
 
+        # upload parsed json result
         upload_text(
-            text=json.dumps(result), bucket=self.BUCKET, object_name=file_parsed
+            text=json.dumps(result), bucket=self.BUCKET, object_name=file_parsed_json
         )
         self.dispatch(
-            "saved:parsed", "s3", "Processed result uploaded to s3 bucket.", file_parsed
+            "uploaded:parsed_json",
+            "s3",
+            "Processed result uploaded to s3 bucket.",
+            file_parsed_json,
+        )
+
+        # upload parsed pdf result
+        upload_file(
+            file_path=parsed_path, bucket=self.BUCKET, object_name=file_parsed_pdf
+        )
+        self.dispatch(
+            "uploaded:parsed_pdf",
+            "s3",
+            "Processed result uploaded to s3 bucket.",
+            file_parsed_pdf,
+            {"filename": (Path(file_path).stem + "-parsed.pdf")},
         )
 
         self.dispatch("script:done", "script", "Processing CV complete.")

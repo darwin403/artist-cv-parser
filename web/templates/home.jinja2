@@ -122,14 +122,14 @@ $(document).ready(function(){
       <p class="subtitle">
         Test with
         <a
-          href="{{ url_for('process', filename='marc.pdf') }}"
+          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com') }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 1</a
         >
         and
         <a
-          href="{{ url_for('process', filename='michael.pdf') }}"
+          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com') }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 2</a

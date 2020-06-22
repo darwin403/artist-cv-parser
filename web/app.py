@@ -2,16 +2,25 @@ import os
 import time
 from pathlib import Path
 
-from flask import Flask, Response, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    Response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    abort,
+)
 from flask_socketio import SocketIO, emit
 from werkzeug.utils import secure_filename
 
 from core.process import Parser
-from core.convert import html2pdf
+from core.convert import web2pdf
 
 # Static variables
 STATIC_FOLDER = "static"
-UPLOAD_FOLDER = Path(__file__).parent / STATIC_FOLDER / "uploads"
+UPLOAD_FOLDER = (Path(__file__).parent / STATIC_FOLDER / "uploads").absolute()
 FILE_PATH = "{uploads}/{filename}".format(
     uploads=str(UPLOAD_FOLDER), filename="{filename}"
 )
@@ -36,6 +45,14 @@ def home():
 # Save file
 @app.route("/save", methods=["POST"])
 def save():
+    # get artist info
+    name = request.form.get("name")
+    email = request.form.get("email")
+
+    # bad request
+    if not name or not email:
+        return abort(400)
+
     cv = request.files["cv"]
     url = request.form["url"]
 
@@ -49,11 +66,7 @@ def save():
     else:
         filename = secure_filename(url) + ".pdf"
         filepath = FILE_PATH.format(filename=filename)
-        html2pdf(url, filepath)
-
-    # get artist info
-    name = request.form.get("name")
-    email = request.form.get("email")
+        web2pdf(url, filepath)
 
     return redirect(
         url_for(
@@ -72,6 +85,10 @@ def process(filename):
     name = request.args.get("name")
     email = request.args.get("email")
 
+    # bad request
+    if not name or not email:
+        return abort(400)
+
     return render_template("result.jinja2", filename=filename, name=name, email=email)
 
 
@@ -82,8 +99,13 @@ socketio = SocketIO(app)
 # Process job
 @socketio.on("job:start")
 def job_start(job):
+    # bad request
+    if not job.get("name") or not job.get("email"):
+        emit("job:done", {"status": "Artist's name and email are not provided."})
+        return
+
     filename = job.get("filename")
-    filepath = (UPLOAD_FOLDER / filename).absolute()
+    filepath = UPLOAD_FOLDER / filename
 
     # check if file exists
     if not os.path.isfile(filepath):
@@ -98,7 +120,7 @@ def job_start(job):
 
     # parse cv
     parser = Parser(meta=meta, emit=emit)
-    parser.process_cv(filepath)
+    result = parser.process_cv(filepath)
 
     # file processing done
     emit("job:done", {"status": "%s processed." % filename})

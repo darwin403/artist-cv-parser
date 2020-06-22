@@ -7,6 +7,11 @@ head %}
       margin-bottom: 1rem;
   }
 
+  .results-download {
+    display: none;
+    margin-bottom: 3rem;
+  }
+
   .results-parsed-title,.results-saved-title {
       margin-bottom:3rem;
       padding-left:0.75rem;text-align:center;
@@ -171,20 +176,28 @@ head %}
     }
 
     // file details
-    if (code === "saved:cv") {
+    if (code === "uploaded:cv") {
       $(".file-location-cv > td:nth-child(2)").html(
         `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../cv.pdf</a>`
       );
     }
-    if (code === "saved:textract") {
+    if (code === "uploaded:textract") {
       $(".file-location-textract > td:nth-child(2)").html(
         `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../textract.json</a>`
       );
     }
-    if (code === "saved:parsed") {
-      $(".file-location-parsed > td:nth-child(2)").html(
+    if (code === "uploaded:parsed_json") {
+      $(".file-location-parsed-json > td:nth-child(2)").html(
         `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../parsed.json</a>`
       );
+    }
+    if (code === "uploaded:parsed_pdf") {
+      $(".file-location-parsed-pdf > td:nth-child(2)").html(
+        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../parsed.pdf</a>`
+      );
+
+      $(".results-download-link").attr("href", `{{ url_for('static', filename='uploads/') }}${meta.filename}`)
+      $(".results-download-link").attr("download", {{ name|tojson|safe }})
     }
   });
 
@@ -200,6 +213,8 @@ head %}
       $(".status-title").html(
         '<i class="fas fa-check-circle" style="color: green; margin-right:1rem;"></i> Success!'
       );
+
+      $(".results-download").css("display", "block");
     } else {
       $(".status-title").html(
         '<i class="fas fa-times-circle" style="color: red; margin-right:1rem;"></i> Failed!'
@@ -258,7 +273,7 @@ head %}
           <div class="upload-pdf">
             <embed
               src="{{ url_for('static', filename='uploads/%s' % filename) }}"
-              style="width: 100%; height: 100%; min-height: 1640px;"
+              style="width: 100%; height: 100%; min-height: 640px;"
               type="application/pdf"
             />
           </div>
@@ -266,9 +281,17 @@ head %}
       </div>
       <div class="column">
         <div class="results">
+          <div class="results-download">
+            <a class="results-download-link button is-success is-large is-fullwidth" href="#" download="#">
+              <span class="icon">
+                <i class="fas fa-download"></i>
+              </span>
+              <span>Download Parsed CV</span>
+            </a>
+          </div>
           <div class="results-parsed box">
             <div class="results-parsed-title">
-              ARTIST DETAILS
+              EXTRACTION DETAILS
             </div>
             <table class="artist table is-fullwidth">
               <tbody>
@@ -308,7 +331,7 @@ head %}
 
           <div class="results-saved box">
             <div class="results-saved-title">
-              EXTRATION DETAILS
+              FILE DETAILS
             </div>
             <table class="file-location table is-fullwidth">
               <tbody>
@@ -320,16 +343,18 @@ head %}
                   <td><b>Textract</b></td>
                   <td><span class="placeholder">Not determined.</span></td>
                 </tr>
-                <tr class="file-location-parsed">
-                  <td><b>Parsed</b></td>
+                <tr class="file-location-parsed-json">
+                  <td><b>Parsed JSON</b></td>
+                  <td><span class="placeholder">Not determined.</span></td>
+                </tr>
+                <tr class="file-location-parsed-pdf">
+                  <td><b>Parsed PDF</b></td>
                   <td><span class="placeholder">Not determined.</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-
-        <div class="content"></div>
       </div>
     </div>
   </div>
