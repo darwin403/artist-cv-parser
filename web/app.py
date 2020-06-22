@@ -71,8 +71,11 @@ def process(filename):
     # get artist info
     name = request.args.get("name")
     email = request.args.get("email")
+    ip = request.environ["REMOTE_ADDR"]
 
-    return render_template("result.jinja2", filename=filename, name=name, email=email)
+    return render_template(
+        "result.jinja2", filename=filename, name=name, email=email, ip=ip
+    )
 
 
 # Declare socket
