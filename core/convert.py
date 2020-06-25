@@ -70,18 +70,14 @@ def html2pdf(html, path):
 def data2pdf(data, path):
     # render template
     template = """
-    <div style="text-align:center; margin-bottom: 5rem">
-        <h1>{input_name} - CV</h1>
-        <h3 style="color:#b7b7b7">
+    <div style="text-align:center; margin-bottom: 5rem;">
+        <h1 style="margin-bottom:1rem">{input_name} - CV</h1>
+        <h5 style="color:#b7b7b7;margin-top:1rem">
             Parsed with <a href="https://artbiogs.com">https://artbiogs.com</a>
-        </h3>
+        </h5>
     </div>
     <table>
         <tbody>
-            <tr>
-                <td><b>Reference ID</b></td>
-                <td>{hash}</td>
-            </tr>
             <tr>
                 <td><b>Name</b></td>
                 <td>{name}</td>
@@ -98,37 +94,69 @@ def data2pdf(data, path):
                 <td colspan="2" style="padding-bottom: 1rem;padding-top: 1rem;"><b>Group Exhibitions:</b></td>
             </tr>
             {group_exhibitions}
-                  
         </tbody>
         <tfoot>
             <tr>
                 <td colspan="2" style="padding-top: 4rem;">
-                    Your reference id is: "{hash}". Contact <a href="mailto:martin.shub@gmail.com">martin.shub@gmail.com</a> for any enquiries.
+                    Your reference id is: "{hash}". Contact <a href="mailto:support@art-prizes.com">support@art-prizes.com</a> for any enquiries.
                 </td>
             </tr>
-        </tfoot>
+        </tfoot>    
     </table>
-    <div style="position:absolute;bottom:0;width:100%;text-align:center">
-        
+
+    <div style="text-align:center; margin-bottom: 5rem;page-break-before: always">
+        <h1 style="margin-bottom:1rem">Submission Info</h1>
+        <h5 style="color:#b7b7b7;margin-top:1rem">
+            Parsed with <a href="https://artbiogs.com">https://artbiogs.com</a>
+        </h5>
     </div>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td><b>About:</b></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><b>Name:</b></td>
+                <td>{input_name}</td>
+            </tr>
+            <tr>
+                <td><b>Email:</b></td>
+                <td>{input_email}</td>
+            </tr>
+            <tr>
+                <td><b>Parsed On:</b></td>
+                <td>{parsedAt}</td>
+            </tr>
+            <tr>
+                <td><b>Reference ID:</b></td>
+                <td>{hash}</td>
+            </tr>
+            <tr>
+                <td><b>IP Address:</b></td>
+                <td>{ip}</td>
+            </tr>
+        </tbody>
+    </table>
     """
+
+    html_exhibitions = {"solo_exhibitions": "", "group_exhibitions": ""}
 
     # convert exhibitions to html bullets
     for t in ["solo_exhibitions", "group_exhibitions"]:
         for index, exhibition in enumerate(data.get(t, [])):
             # no title
             if not exhibition.get("title"):
-                data[t][index] = ""
                 continue
 
             # bullet template
-            li = "<tr><td colspan='2' style='padding-left: 3rem'>{year}: <span style='background-color:yellow;'>{title}</span>{remaining}</td></tr>"
+            li = "<tr><td colspan='2' style='padding-left: 3rem'>{year}: <u>{title}</u> {remaining}</td></tr>"
 
             # convert json to html
-            data[t][index] = li.format(
+            html_exhibitions[t] += li.format(
                 year=exhibition.get("year"),
                 title=exhibition.get("title"),
-                remaining=exhibition.get("original").replace(
+                remaining=exhibition.get("original", "").replace(
                     exhibition.get("title"), ""
                 ),
             )
@@ -138,11 +166,15 @@ def data2pdf(data, path):
         hash=data.get("meta", {}).get("hash") or "Not provided.",
         name=data.get("name") or "Not detected.",
         dob=data.get("dob") or "Not Detected.",
-        solo_exhibitions="".join(data.get("solo_exhibitions", []))
+        solo_exhibitions=html_exhibitions.get("solo_exhibitions")
         or "<tr><td>Not detected.</td></tr>",
-        group_exhibitions="".join(data.get("group_exhibitions", []))
-        or "<tr><td>Not detected.</td></tr>",
+        group_exhibitions=html_exhibitions.get("group_exhibitions")
+        or "<tr><td style='padding-left:2rem;'>Not detected.</td></tr>",
         input_name=data.get("meta", {}).get("input", {}).get("name") or "Not provided.",
+        input_email=data.get("meta", {}).get("input", {}).get("email")
+        or "Not provided.",
+        parsedAt=data.get("meta", {}).get("parsedAt") or "Not Provided.",
+        ip=data.get("meta", {}).get("ip") or "Not Provided.",
     )
 
     html2pdf(html, path)
@@ -151,7 +183,129 @@ def data2pdf(data, path):
 
 
 if __name__ == "__main__":
-    # html2pdf(sys.argv[1], sys.argv[2])
+    # web2pdf(sys.argv[1], sys.argv[2])
 
-    data = {}
+    data = {
+        "name": "Annika Rameyn",
+        "dob": "1986",
+        "solo_exhibitions": [
+            {
+                "year": "2020",
+                "title": "Endurance",
+                "original": "Endurance, Flinders Lane Gallery, Melbourne.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2019",
+                "title": "Endurance",
+                "original": "Endurance, Megalo Print Studio and Gallery, Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2019",
+                "title": "Upheaval",
+                "original": "Upheaval, Goulburn Regional Art Gallery, Goulburn, NSW.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2018",
+                "title": "Ghosts",
+                "original": "Ghosts, Flinders Lane Gallery, Melbourne.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2018",
+                "title": "Verge",
+                "original": "Verge, Biennale of Australian Art, George Farmer Building,",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2018",
+                "title": "Ballarat",
+                "original": "Ballarat, Victoria.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2018",
+                "title": "Composition in Blue",
+                "original": "Composition in Blue, Belconnen Arts Centre, Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2017",
+                "title": "Precipice",
+                "original": "Precipice, ANCA Gallery, Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2015",
+                "title": "Passage",
+                "original": "Passage, Flinders Lane Gallery, Melbourne.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2013",
+                "title": "Luminous Earth",
+                "original": "Luminous Earth, Canberra Contemporary Art Space",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2013",
+                "title": "Manuka",
+                "original": "Manuka, Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2013",
+                "title": "These Walls",
+                "original": "These Walls, Port Jackson Press Print Room, Melbourne.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2012",
+                "title": "Barranco",
+                "original": "Barranco, Photospace Gallery, A.N.U. School of Art,",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2012",
+                "title": None,
+                "original": "Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2011",
+                "title": "Drift",
+                "original": "Drift, Belconnen Gallery, Belconnen Community Centre,",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2011",
+                "title": None,
+                "original": "Canberra.",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2011",
+                "title": "Autumn Leaves",
+                "original": "Autumn Leaves, Canberra Contemporary Art Space Manuka,",
+                "type": "solo_exhibitions",
+            },
+            {
+                "year": "2011",
+                "title": None,
+                "original": "Canberra.",
+                "type": "solo_exhibitions",
+            },
+        ],
+        "group_exhibitions": [],
+        "meta": {
+            "hash": "3727bc7c83af26d08cc00cd9f6e3ddd0",
+            "input": {"name": "Annika Romeyn", "email": "annikaromeyn@gmail.com  "},
+            "ip": "203.115.95.151",
+            "createdAt": "2020-06-25 15:25:20",
+            "parsedAt": "2020-06-25 15:26:37",
+        },
+    }
+
     data2pdf(data, "cv-parsed.pdf")
