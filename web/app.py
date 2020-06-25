@@ -51,7 +51,7 @@ def save():
     is_artist = request.form.get("is_artist")
 
     # bad request
-    if not name or not email or not is_artist:
+    if not name or not email:
         return abort(400)
 
     cv = request.files["cv"]
@@ -75,7 +75,7 @@ def save():
             filename=filename,
             name=name if name else None,
             email=email if email else None,
-            is_artist=is_artist if is_artist else None,
+            is_artist=not not is_artist,
         )
     )
 
@@ -86,14 +86,14 @@ def process(filename):
     # get artist info
     name = request.args.get("name")
     email = request.args.get("email")
-    is_artist = request.args.get("is_artist")
+    is_artist = request.args.get("is_artist") == "True"
 
     # bad request
-    if not name or not email or not is_artist:
+    if not name or not email:
         return abort(400)
 
     return render_template(
-        "result.jinja2", filename=filename, name=name, email=email, is_artist=is_artist
+        "result.jinja2", filename=filename, name=name, email=email, is_artist=is_artist,
     )
 
 
@@ -105,7 +105,7 @@ socketio = SocketIO(app)
 @socketio.on("job:start")
 def job_start(job):
     # bad request
-    if not job.get("name") or not job.get("email") or not job.get("is_artist"):
+    if not job.get("name") or not job.get("email"):
         emit(
             "job:done", {"status": "Artist's name, email or identity is not provided."}
         )
@@ -124,7 +124,7 @@ def job_start(job):
         "input": {
             "name": job.get("name"),
             "email": job.get("email"),
-            "is_artist": True,
+            "is_artist": job.get("is_artist") == True,
         },
         "ip": job.get("ip"),
     }

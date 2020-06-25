@@ -113,6 +113,10 @@ def data2pdf(data, path):
     <table style="width:100%">
         <tbody>
             <tr>
+                <td><b>Submitted by Artist:</b></td>
+                <td>{is_artist}</td>
+            </tr>
+            <tr>
                 <td><b>About:</b></td>
                 <td>-</td>
             </tr>
@@ -123,7 +127,7 @@ def data2pdf(data, path):
             <tr>
                 <td><b>Email:</b></td>
                 <td>{input_email}</td>
-            </tr>
+            </tr>            
             <tr>
                 <td><b>Parsed On:</b></td>
                 <td>{parsedAt}</td>
@@ -173,6 +177,9 @@ def data2pdf(data, path):
         input_name=data.get("meta", {}).get("input", {}).get("name") or "Not provided.",
         input_email=data.get("meta", {}).get("input", {}).get("email")
         or "Not provided.",
+        is_artist="Yes"
+        if data.get("meta", {}).get("input", {}).get("is_artist")
+        else "No",
         parsedAt=data.get("meta", {}).get("parsedAt") or "Not Provided.",
         ip=data.get("meta", {}).get("ip") or "Not Provided.",
     )

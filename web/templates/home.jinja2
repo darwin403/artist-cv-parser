@@ -57,7 +57,6 @@ $(document).ready(function(){
     const email = $('input[name="email"]');
     const cv = $('input[name="cv"]');
     const url = $('input[name="url"]');
-    const is_artist = $('input[name="is_artist"]');
 
     // highlight missing upload or web field
     if (!url.val() && !cv.val()){
@@ -80,15 +79,8 @@ $(document).ready(function(){
       email.removeClass("is-danger");
     }
 
-    // highlight missing checkbox
-    if (!is_artist.is(":checked")){
-      is_artist.parent().addClass('has-text-danger');
-    } else {
-      is_artist.parent().removeClass('has-text-danger');
-    }
-
     // form status
-    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val()) && !!is_artist.is(":checked");
+    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val())
 
     return isValid;
   })
@@ -130,14 +122,14 @@ $(document).ready(function(){
       <p class="subtitle">
         Test with
         <a
-          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com', is_artist='on') }}"
+          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com', is_artist=False) }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 1</a
         >
         and
         <a
-          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com', is_artist='on') }}"
+          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com', is_artist=False) }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 2</a
