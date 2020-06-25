@@ -212,6 +212,7 @@ class Parser:
             "input": {
                 "name": self.meta.get("input", {}).get("name", "").title() or None,
                 "email": self.meta.get("input", {}).get("email"),
+                "is_artist": self.meta.get("input", {}).get("is_artist", False),
             },
             "ip": self.meta.get("ip"),
             "createdAt": now,

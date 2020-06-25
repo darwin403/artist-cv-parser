@@ -110,6 +110,7 @@ head %}
       filename: {{ filename|tojson|safe }}, 
       name: {{ name|tojson|safe }}, 
       email: {{ email|tojson|safe }},
+      is_artist: {{ is_artist|tojson|safe }},
       ip: get_ip(),
     });
 
@@ -239,7 +240,7 @@ head %}
   <div class="container">
     <div class="navbar-brand">
       <a class="navbar-item" href="/">
-        Artex
+        Art Biographies
       </a>
       <span class="navbar-burger burger">
         <span></span>

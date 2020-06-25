@@ -57,6 +57,7 @@ $(document).ready(function(){
     const email = $('input[name="email"]');
     const cv = $('input[name="cv"]');
     const url = $('input[name="url"]');
+    const is_artist = $('input[name="is_artist"]');
 
     // highlight missing upload or web field
     if (!url.val() && !cv.val()){
@@ -69,18 +70,25 @@ $(document).ready(function(){
     if (!name.val()){
       name.addClass("is-danger");
     } else {
-      name.removeClass("is-danger")
+      name.removeClass("is-danger");
     }
 
     // highlight missing email
     if (!email.val()){
       email.addClass("is-danger");
     } else {
-      email.removeClass("is-danger")
+      email.removeClass("is-danger");
+    }
+
+    // highlight missing checkbox
+    if (!is_artist.is(":checked")){
+      is_artist.parent().addClass('has-text-danger');
+    } else {
+      is_artist.parent().removeClass('has-text-danger');
     }
 
     // form status
-    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val())
+    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val()) && !!is_artist.is(":checked");
 
     return isValid;
   })
@@ -102,7 +110,7 @@ $(document).ready(function(){
       <div class="container">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
-            Artex
+            Art Biographies
           </a>
           <span class="navbar-burger burger">
             <span></span>
@@ -117,19 +125,19 @@ $(document).ready(function(){
   <div class="hero-body">
     <div class="container has-text-centered">
       <p class="title">
-        Process a Artist CV
+        Import your CV - for Visual Artists
       </p>
       <p class="subtitle">
         Test with
         <a
-          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com') }}"
+          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com', is_artist='on') }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 1</a
         >
         and
         <a
-          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com') }}"
+          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com', is_artist='on') }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 2</a
@@ -179,6 +187,14 @@ $(document).ready(function(){
               <i class="fas fa-globe"></i>
             </span>
           </p>
+        </div>
+        <div class="field">
+          <div class="control">
+            <label class="checkbox">
+              <input type="checkbox" name="is_artist">
+              Are you the above artist?
+            </label>
+          </div>
         </div>
         <div class="field">
           <div class="control">
