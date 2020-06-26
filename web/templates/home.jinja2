@@ -98,9 +98,27 @@ $(document).ready(function(){
 {% block body %}
 <section class="hero is-info is-fullheight">
   <div class="hero-head">
-    <a class="brand" href="/">
-      <img src="/static/logo.png"">
-    </a>
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-brand">
+            <a class="logo" href="/">
+              <img src="/static/logo.png"">
+            </a>
+            <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu"  id="navMenu">
+          <div class="navbar-end">
+            <a class="navbar-item" id="btn-about">
+                About
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
   </div>
 
   <div class="hero-body">
@@ -111,14 +129,14 @@ $(document).ready(function(){
       <p class="subtitle">
         Test with
         <a
-          href="{{ url_for('process', filename='marc.pdf', name='Marc Ethfrington', email='marc@artgallery.com', is_artist=False) }}"
+          href="{{ url_for('process', filename='sample1.pdf', name='John Doe', email='johndoe@artgallery.com', is_artist=False) }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 1</a
         >
         and
         <a
-          href="{{ url_for('process', filename='michael.pdf', name='Michael Zavros', email='michael@artgallery.com', is_artist=False) }}"
+          href="{{ url_for('process', filename='sample2.pdf', name='Mary Jane', email='maryjane@artgallery.com', is_artist=False) }}"
           target="new"
           style="text-decoration: underline;"
           >Sample 2</a

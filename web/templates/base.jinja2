@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" />
 
   <title>{% block title %}{% endblock %} | Art Biographies</title>
 
@@ -18,17 +18,17 @@
     nav {
       background-color: #238cd1;
     }
-    .brand {
+    .logo {
       display: inline-block;
       margin: 0.5rem;
       padding: 0.5rem 1rem;
       border-radius: 0.25rem;
     }
-    .brand > img {
+    .logo > img {
       max-width: 145px;
       height: auto;
     }
-    .brand:hover{
+    .logo:hover{
       background-color: #238cd1;
     }
   </style>
@@ -39,6 +39,60 @@
 
 <body>
   {% block body %}{% endblock %}
+
+  <!-- About -->
+  <div class="modal" id="modal-about">
+    <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">About</p>
+          <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </section>
+        <footer class="modal-card-foot">
+        </footer>
+      </div>
+  </div>
 </body>
+
+<script>
+
+  // Handle About click
+  $("#btn-about").click(function(){
+    $(".modal").addClass("is-active");
+  })
+
+
+  // Handle Modal close
+  $('.modal [aria-label="close"]').click(function(){
+    $(this).closest('.modal').removeClass("is-active");
+  })
+
+  // Handle Navbar burger
+  // Get all "navbar-burger" elements
+  const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+  // Check if there are any navbar burgers
+  if ($navbarBurgers.length > 0) {
+
+    // Add a click event on each of them
+    $navbarBurgers.forEach( el => {
+      el.addEventListener('click', () => {
+
+        // Get the target from the "data-target" attribute
+        const target = el.dataset.target;
+        const $target = document.getElementById(target);
+
+        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+        el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+
+      });
+    });
+  }
+
+</script>
 
 </html>

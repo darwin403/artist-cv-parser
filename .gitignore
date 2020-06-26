@@ -11,5 +11,6 @@ yarn.lock
 # user generated
 
 .vscode/
+web/static/uploads/
 dumps/
 logs/
