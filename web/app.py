@@ -89,8 +89,8 @@ def process(filename):
     is_artist = request.args.get("is_artist") == "True"
 
     # bad request
-    # if not name or not email:
-    #     return abort(400)
+    if not name or not email:
+        return abort(400)
 
     return render_template(
         "result.jinja2", filename=filename, name=name, email=email, is_artist=is_artist,

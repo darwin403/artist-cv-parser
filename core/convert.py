@@ -105,7 +105,7 @@ def data2pdf(data, path):
     </table>
 
     <div style="text-align:center; margin-bottom: 5rem;page-break-before: always">
-        <h1 style="margin-bottom:1rem">Submission Info</h1>
+        <h1 style="margin-bottom:1rem">About your Scanned CV</h1>
         <h5 style="color:#b7b7b7;margin-top:1rem">
             Parsed with <a href="https://artbiogs.com">https://artbiogs.com</a>
         </h5>
@@ -115,10 +115,6 @@ def data2pdf(data, path):
             <tr>
                 <td><b>Submitted by Artist:</b></td>
                 <td>{is_artist}</td>
-            </tr>
-            <tr>
-                <td><b>About:</b></td>
-                <td>-</td>
             </tr>
             <tr>
                 <td><b>Name:</b></td>
