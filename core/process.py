@@ -179,6 +179,10 @@ class Parser:
                     if not text:
                         continue
 
+                    # line less than 3 words
+                    if len(text.split()) < 3:
+                        continue
+
                     text = text.strip()
                     exhibition = ExtractExhibition()
                     title = exhibition.process(year=year, text=text)
