@@ -116,7 +116,12 @@ class Parser:
 
             # gather all years in section
             for i, b in enumerate(blocks):
-                text = b.get("Text", "").lower()
+                # hack: two line section titles
+                text = (
+                    (blocks[i]["Text"].lower() + " " + blocks[i + 1]["Text"].lower())
+                    if i + 1 < len(blocks)
+                    else b["Text"].lower()
+                )
 
                 if not text:
                     continue
@@ -172,18 +177,32 @@ class Parser:
                     else section_end_index
                 )
 
+                # hack: append next to previous if less than 4 words
+                for x in range(exhibition_start_index, exhibition_end_index):
+
+                    text = blocks[x]["Text"]
+                    text_next = blocks[x + 1]["Text"]
+
+                    # line less than 4 words
+                    if len(text.split()) <= 3:
+                        blocks[x]["Text"] = ""
+                        continue
+
+                    # next line less than 4 words
+                    if len(text_next.split()) <= 3 and not re.findall(
+                        r"^(?:19|20)\d{2}", text_next
+                    ):
+                        blocks[x]["Text"] = text + ", " + text_next
+
+                # iterate over all exhibitions between years
                 for x in range(exhibition_start_index, exhibition_end_index):
                     text = blocks[x]
                     text = re.sub(r"^(?:19|20)\d{2}", "", blocks[x]["Text"])
+                    text = text.strip()
 
                     if not text:
                         continue
 
-                    # line less than 3 words
-                    if len(text.split()) < 3:
-                        continue
-
-                    text = text.strip()
                     exhibition = ExtractExhibition()
                     title = exhibition.process(year=year, text=text)
 
@@ -249,7 +268,7 @@ class Parser:
             self.dispatch(
                 "welp",
                 "textract",
-                "Textract is detecting text. This might take a few mintutes.",
+                "Textract is detecting text. This might take a few minutes.",
             )
 
             blocks = process_file(bucket=self.BUCKET, object_name=file_temp)
