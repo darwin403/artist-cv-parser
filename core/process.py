@@ -184,12 +184,12 @@ class Parser:
                     text_next = blocks[x + 1]["Text"]
 
                     # line less than 4 words
-                    if len(text.split()) <= 5:
+                    if len(text.split()) <= 4:
                         blocks[x]["Text"] = ""
                         continue
 
                     # next line less than 4 words
-                    if len(text_next.split()) <= 5 and not re.findall(
+                    if len(text_next.split()) <= 4 and not re.findall(
                         r"^(?:19|20)\d{2}", text_next
                     ):
                         blocks[x]["Text"] = text + " " + text_next
