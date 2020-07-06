@@ -35,11 +35,12 @@ def web2pdf(url, path):
     # load url
     browser.get(url)
 
+    # ! BUG: Setting print options is not working!
     print_options = {
-        "landscape": False,
-        "displayHeaderFooter": False,
-        "printBackground": True,
-        "preferCSSPageSize": True,
+        # "landscape": False,
+        # "displayHeaderFooter": False,
+        # "printBackground": True,
+        # "preferCSSPageSize": True,
     }
 
     result = send_devtools(browser, "Page.printToPDF", print_options)
@@ -186,7 +187,8 @@ def data2pdf(data, path):
 
 
 if __name__ == "__main__":
-    # web2pdf(sys.argv[1], sys.argv[2])
+    web2pdf(sys.argv[1], sys.argv[2])
+    sys.exit()
 
     data = {
         "name": "Annika Rameyn",
