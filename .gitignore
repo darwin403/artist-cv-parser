@@ -1,16 +1,8 @@
 # python
-venv/
+.venv/
+*.egg-info/
 __pycache__
 *.pyc
 
-# node
-node_modules/
-package-lock.json
-yarn.lock
-
 # user generated
-
-.vscode/
 web/static/uploads/
-dumps/
-logs/

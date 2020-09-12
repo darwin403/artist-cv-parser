@@ -5,18 +5,20 @@ from pathlib import Path
 from flask import (
     Flask,
     Response,
+    abort,
     redirect,
     render_template,
     request,
     session,
     url_for,
-    abort,
 )
-from flask_socketio import SocketIO, emit
 from werkzeug.utils import secure_filename
 
-from core.process import Parser
 from core.convert import web2pdf
+from core.process import Parser
+from flask_socketio import SocketIO, emit
+
+from config import AWS_BUCKET_NAME, AWS_REGION_NAME
 
 # Static variables
 STATIC_FOLDER = "static"
@@ -24,7 +26,6 @@ UPLOAD_FOLDER = (Path(__file__).parent / STATIC_FOLDER / "uploads").absolute()
 FILE_PATH = "{uploads}/{filename}".format(
     uploads=str(UPLOAD_FOLDER), filename="{filename}"
 )
-ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "png"]
 
 # Create upload folder if does not exist
 if not os.path.isdir(UPLOAD_FOLDER):
@@ -45,15 +46,6 @@ def home():
 # Save file
 @app.route("/save", methods=["POST"])
 def save():
-    # get artist info
-    name = request.form.get("name")
-    email = request.form.get("email")
-    is_artist = request.form.get("is_artist")
-
-    # bad request
-    if not name or not email:
-        return abort(400)
-
     cv = request.files["cv"]
     url = request.form["url"]
 
@@ -69,31 +61,17 @@ def save():
         filepath = FILE_PATH.format(filename=filename)
         web2pdf(url, filepath)
 
-    return redirect(
-        url_for(
-            "process",
-            filename=filename,
-            name=name if name else None,
-            email=email if email else None,
-            is_artist=not not is_artist,
-        )
-    )
+    return redirect(url_for("process", filename=filename))
 
 
 # Process file
 @app.route("/process/<filename>", methods=["GET"])
 def process(filename):
-    # get artist info
-    name = request.args.get("name")
-    email = request.args.get("email")
-    is_artist = request.args.get("is_artist") == "True"
-
-    # bad request
-    if not name or not email:
-        return abort(400)
-
     return render_template(
-        "result.jinja2", filename=filename, name=name, email=email, is_artist=is_artist,
+        "result.jinja2",
+        filename=filename,
+        bucket_name=AWS_BUCKET_NAME,
+        bucket_region=AWS_REGION_NAME,
     )
 
 
@@ -104,13 +82,6 @@ socketio = SocketIO(app)
 # Process job
 @socketio.on("job:start")
 def job_start(job):
-    # bad request
-    if not job.get("name") or not job.get("email"):
-        emit(
-            "job:done", {"status": "Artist's name, email or identity is not provided."}
-        )
-        return
-
     filename = job.get("filename")
     filepath = UPLOAD_FOLDER / filename
 
@@ -119,23 +90,13 @@ def job_start(job):
         emit("job:done", {"status": "%s does not exist." % filename})
         return
 
-    # save user info
-    meta = {
-        "input": {
-            "name": job.get("name"),
-            "email": job.get("email"),
-            "is_artist": job.get("is_artist") == True,
-        },
-        "ip": job.get("ip"),
-    }
-
     # parse cv
-    parser = Parser(meta=meta, emit=emit)
-    result = parser.process_cv(filepath)
+    parser = Parser(emit=emit)
+    parser.process_cv(filepath)
 
     # file processing done
     emit("job:done", {"status": "%s processed." % filename})
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host="0.0.0.0", port=os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=os.environ.get("PORT", 5000))

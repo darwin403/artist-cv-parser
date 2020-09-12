@@ -3,11 +3,10 @@ import json
 import os
 import sys
 
+import pdfkit
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-
-import pdfkit
 
 
 # Devtools handler
@@ -72,9 +71,9 @@ def data2pdf(data, path):
     # render template
     template = """
     <div style="text-align:center; margin-bottom: 5rem;">
-        <h1 style="margin-bottom:1rem">{input_name} - CV</h1>
+        <h1 style="margin-bottom:1rem">{name} - CV</h1>
         <h5 style="color:#b7b7b7;margin-top:1rem">
-            Parsed with <a href="https://artbiogs.com">https://artbiogs.com</a>
+            Original CV hash: {hash}
         </h5>
     </div>
     <table>
@@ -95,49 +94,7 @@ def data2pdf(data, path):
                 <td colspan="2" style="padding-bottom: 1rem;padding-top: 1rem;"><b>Group Exhibitions:</b></td>
             </tr>
             {group_exhibitions}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="2" style="padding-top: 4rem;">
-                    Your reference id is: "{hash}". Contact <a href="mailto:support@art-prizes.com">support@art-prizes.com</a> for any enquiries.
-                </td>
-            </tr>
-        </tfoot>    
-    </table>
-
-    <div style="text-align:center; margin-bottom: 5rem;page-break-before: always">
-        <h1 style="margin-bottom:1rem">About your Scanned CV</h1>
-        <h5 style="color:#b7b7b7;margin-top:1rem">
-            Parsed with <a href="https://artbiogs.com">https://artbiogs.com</a>
-        </h5>
-    </div>
-    <table style="width:100%">
-        <tbody>
-            <tr>
-                <td><b>Submitted by Artist:</b></td>
-                <td>{is_artist}</td>
-            </tr>
-            <tr>
-                <td><b>Name:</b></td>
-                <td>{input_name}</td>
-            </tr>
-            <tr>
-                <td><b>Email:</b></td>
-                <td>{input_email}</td>
-            </tr>            
-            <tr>
-                <td><b>Parsed On:</b></td>
-                <td>{parsedAt}</td>
-            </tr>
-            <tr>
-                <td><b>Reference ID:</b></td>
-                <td>{hash}</td>
-            </tr>
-            <tr>
-                <td><b>IP Address:</b></td>
-                <td>{ip}</td>
-            </tr>
-        </tbody>
+        </tbody> 
     </table>
     """
 
@@ -151,7 +108,7 @@ def data2pdf(data, path):
                 continue
 
             # bullet template
-            li = "<tr><td colspan='2' style='padding-left: 3rem'>{year}: <u>{title}</u> {remaining}</td></tr>"
+            li = "<tr><td colspan='2' style='padding-left: 3rem'>{year}: <u style='background:yellow;'>{title}</u> {remaining}</td></tr>"
 
             # convert json to html
             html_exhibitions[t] += li.format(
@@ -166,19 +123,11 @@ def data2pdf(data, path):
     html = template.format(
         hash=data.get("meta", {}).get("hash") or "Not provided.",
         name=data.get("name") or "Not detected.",
-        dob=data.get("dob") or "Not Detected.",
+        dob=data.get("dob") or "Not detected.",
         solo_exhibitions=html_exhibitions.get("solo_exhibitions")
         or "<tr><td>Not detected.</td></tr>",
         group_exhibitions=html_exhibitions.get("group_exhibitions")
         or "<tr><td style='padding-left:2rem;'>Not detected.</td></tr>",
-        input_name=data.get("meta", {}).get("input", {}).get("name") or "Not provided.",
-        input_email=data.get("meta", {}).get("input", {}).get("email")
-        or "Not provided.",
-        is_artist="Yes"
-        if data.get("meta", {}).get("input", {}).get("is_artist")
-        else "No",
-        parsedAt=data.get("meta", {}).get("parsedAt") or "Not Provided.",
-        ip=data.get("meta", {}).get("ip") or "Not Provided.",
     )
 
     html2pdf(html, path)
@@ -304,13 +253,7 @@ if __name__ == "__main__":
             },
         ],
         "group_exhibitions": [],
-        "meta": {
-            "hash": "3727bc7c83af26d08cc00cd9f6e3ddd0",
-            "input": {"name": "Annika Romeyn", "email": "annikaromeyn@gmail.com  "},
-            "ip": "203.115.95.151",
-            "createdAt": "2020-06-25 15:25:20",
-            "parsedAt": "2020-06-25 15:26:37",
-        },
+        "meta": {"hash": "3727bc7c83af26d08cc00cd9f6e3ddd0",},
     }
 
     data2pdf(data, "cv-parsed.pdf")

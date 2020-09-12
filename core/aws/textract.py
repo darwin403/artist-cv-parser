@@ -3,13 +3,13 @@ from math import ceil, sqrt
 
 import boto3
 
-from core.aws.config import AWS_ACCESS_KEY_ID, AWS_DEFAULT_REGION, AWS_SECRET_ACCESS_KEY
+from config import AWS_ACCESS_KEY_ID, AWS_REGION_NAME, AWS_SECRET_ACCESS_KEY
 
 client = boto3.client(
     "textract",
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION,
+    region_name=AWS_REGION_NAME,
 )
 
 
@@ -52,4 +52,4 @@ def process_file(bucket, object_name):
 
 
 if __name__ == "__main__":
-    process_file(bucket="textract-cvs", object_name="kate-1.pdf")
+    process_file(bucket="artbiogs-staging", object_name="kate-1.pdf")

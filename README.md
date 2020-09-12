@@ -1,15 +1,29 @@
-# Project Name
+# Artbiogs - Artist CV Parser
 
-> Project description
+> A web application that uses AI/ML to detect Artist's Exhibition details from a CV.
 
-![](screenshot.png)
+![](screenshot1.png)
+![](screenshot2.png)
 
-# Install
+# Deploy
 
-1. Google-Chrome is required, wktohtl
-2. For heroku, Install google-chrome buildpack on heroku: `https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-google-chrome`. wktohtml also `https://github.com/chap/wkhtmltopdf-heroku-18-buildpack`
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-# Usage
+# Development
+
+You require Python 3.6 or greater. First clone the repository and change directory to the project folder. Then run the following:
+
+```bash
+python setup.py develop
+```
+
+This installs all the necessary dependencies to run the python project. You can now launch the web application by running:
+
+```bash
+python web/app.py
+```
+
+You can now view the application at [http://localhost:5000](localhost:5000)
 
 # Features
 

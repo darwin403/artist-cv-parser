@@ -1,17 +1,18 @@
+import datetime
 import hashlib
 import json
-from pathlib import Path
 import re
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-import sys
-import datetime
+from pathlib import Path
 
-from core.aws.s3 import exists_file, read_file, upload_file, upload_text
-from core.aws.comprehend import ExtractBirthday, ExtractName, ExtractExhibition
+from core.aws.comprehend import ExtractBirthday, ExtractExhibition, ExtractName
+from core.aws.s3 import create_bucket, exists_file, read_file, upload_file, upload_text
 from core.aws.textract import process_file
 from core.convert import data2pdf
 
+from config import AWS_BUCKET_NAME
 
 exhibition = ExtractExhibition()
 
@@ -19,9 +20,6 @@ exhibition = ExtractExhibition()
 class Parser:
 
     # file locations
-    # BUCKET = "artists-cvs"
-    BUCKET = "artex-staging"
-
     TMP_FILE = "tmp/{hash}.pdf"
     TEXTRACT_JSON = "tmp/{hash}.json"
 
@@ -116,12 +114,7 @@ class Parser:
 
             # gather all years in section
             for i, b in enumerate(blocks):
-                # hack: two line section titles
-                text = (
-                    (blocks[i]["Text"].lower() + " " + blocks[i + 1]["Text"].lower())
-                    if i + 1 < len(blocks)
-                    else b["Text"].lower()
-                )
+                text = b.get("Text", "").lower()
 
                 if not text:
                     continue
@@ -176,23 +169,6 @@ class Parser:
                     if j + 1 < len(section_year_indexes)
                     else section_end_index
                 )
-
-                # hack: append next to previous if less than 4 words
-                for x in range(exhibition_start_index, exhibition_end_index):
-
-                    text = blocks[x]["Text"]
-                    text_next = blocks[x + 1]["Text"]
-
-                    # line less than 4 words
-                    if len(text.split()) <= 4:
-                        blocks[x]["Text"] = ""
-                        continue
-
-                    # next line less than 4 words
-                    if len(text_next.split()) <= 4 and not re.findall(
-                        r"^(?:19|20)\d{2}", text_next
-                    ):
-                        blocks[x]["Text"] = text + " " + text_next
 
                 # iterate over all exhibitions between years
                 for x in range(exhibition_start_index, exhibition_end_index):
@@ -249,10 +225,14 @@ class Parser:
 
         file_temp = self.TMP_FILE.format(hash=file_hash)
 
+        # create bucket if not exists
+        if create_bucket(bucket=AWS_BUCKET_NAME):
+            self.dispatch("welp", "s3", "S3 Bucket created.", AWS_BUCKET_NAME)
+
         # check if temp file exists in s3
-        if not exists_file(bucket=self.BUCKET, object_name=file_temp):
+        if not exists_file(bucket=AWS_BUCKET_NAME, object_name=file_temp):
             response = upload_file(
-                file_path=file_path, bucket=self.BUCKET, object_name=file_temp
+                file_path=file_path, bucket=AWS_BUCKET_NAME, object_name=file_temp
             )
             self.dispatch("welp", "s3", "PDF uploaded to s3 bucket.", response)
         else:
@@ -261,27 +241,26 @@ class Parser:
         file_textract = self.TEXTRACT_JSON.format(hash=file_hash)
 
         # check if temp file already processed in s3
-        if not exists_file(bucket=self.BUCKET, object_name=file_textract):
+        if not exists_file(bucket=AWS_BUCKET_NAME, object_name=file_textract):
             self.dispatch("welp", "textract", "OCR does not exist in s3 bucket.")
 
-            # ! This dispatch can be removed
             self.dispatch(
                 "welp",
                 "textract",
                 "Textract is detecting text. This might take a few minutes.",
             )
 
-            blocks = process_file(bucket=self.BUCKET, object_name=file_temp)
+            blocks = process_file(bucket=AWS_BUCKET_NAME, object_name=file_temp)
             self.dispatch("welp", "textract", "OCR text processed.")
 
             text = json.dumps(blocks)
-            upload_text(text=text, bucket=self.BUCKET, object_name=file_textract)
+            upload_text(text=text, bucket=AWS_BUCKET_NAME, object_name=file_textract)
             self.dispatch("welp", "s3", "OCR text saved to s3 bucket.")
 
         else:
             self.dispatch("welp", "s3", "OCR exists in s3 bucket.")
 
-            text = read_file(bucket=self.BUCKET, object_name=file_textract)
+            text = read_file(bucket=AWS_BUCKET_NAME, object_name=file_textract)
             self.dispatch("welp", "s3", "OCR text loaded from s3 bucket.")
 
             blocks = json.loads(text)
@@ -315,12 +294,14 @@ class Parser:
         file_parsed_pdf = self.PARSED_PDF.format(name=folder_name)
 
         # upload original file
-        upload_file(file_path=file_path, bucket=self.BUCKET, object_name=file_original)
+        upload_file(
+            file_path=file_path, bucket=AWS_BUCKET_NAME, object_name=file_original
+        )
         self.dispatch("uploaded:cv", "s3", "CV uploaded to s3 bucket.", file_original)
 
         # upload textract result
         upload_text(
-            text=json.dumps(blocks), bucket=self.BUCKET, object_name=file_textract
+            text=json.dumps(blocks), bucket=AWS_BUCKET_NAME, object_name=file_textract
         )
         self.dispatch(
             "uploaded:textract",
@@ -331,7 +312,9 @@ class Parser:
 
         # upload parsed json result
         upload_text(
-            text=json.dumps(result), bucket=self.BUCKET, object_name=file_parsed_json
+            text=json.dumps(result),
+            bucket=AWS_BUCKET_NAME,
+            object_name=file_parsed_json,
         )
         self.dispatch(
             "uploaded:parsed_json",
@@ -342,7 +325,7 @@ class Parser:
 
         # upload parsed pdf result
         upload_file(
-            file_path=parsed_path, bucket=self.BUCKET, object_name=file_parsed_pdf
+            file_path=parsed_path, bucket=AWS_BUCKET_NAME, object_name=file_parsed_pdf
         )
         self.dispatch(
             "uploaded:parsed_pdf",

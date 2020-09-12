@@ -3,13 +3,26 @@ from pathlib import Path
 import boto3
 from botocore.errorfactory import ClientError
 
-from core.aws.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from config import AWS_ACCESS_KEY_ID, AWS_REGION_NAME, AWS_SECRET_ACCESS_KEY
 
 s3 = boto3.client(
     "s3",
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_REGION_NAME,
 )
+
+
+def create_bucket(bucket):
+    try:
+        s3.create_bucket(
+            Bucket=bucket,
+            CreateBucketConfiguration={"LocationConstraint": AWS_REGION_NAME},
+        )
+    except ClientError as e:
+        return False
+
+    return True
 
 
 def upload_text(text, bucket, object_name):
@@ -58,11 +71,10 @@ def upload_file(file_path, bucket, object_name=None):
 def exists_file(bucket, object_name):
     try:
         s3.head_object(Bucket=bucket, Key=object_name)
-        return True
     except ClientError:
-        pass
+        return False
 
-    return False
+    return True
 
 
 def copy_file(source, bucket, object_name):

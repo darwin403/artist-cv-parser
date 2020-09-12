@@ -1,8 +1,9 @@
-{% extends "base.jinja2" %} {% block title %} Welcome {% endblock %} {% block
-css %}
+{% extends "components/base.jinja2" %}
+{% block title %} Welcome {% endblock %} 
+{% block css %}
 <style>
   .subtitle {
-    color: rgba(255,255,255,.6) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
   }
   form {
     margin: 0 auto;
@@ -51,69 +52,61 @@ css %}
 
 {% block js %}
 <script>
-$(document).ready(function(){
-  $('form').submit(function(){
-    const name = $('input[name="name"]');
-    const email = $('input[name="email"]');
-    const cv = $('input[name="cv"]');
-    const url = $('input[name="url"]');
+  $(document).ready(function () {
+    $("form").submit(function () {
+      const cv = $('input[name="cv"]');
+      const url = $('input[name="url"]');
 
-    // highlight missing upload or web field
-    if (!url.val() && !cv.val()){
-      url.addClass("is-danger");
-    } else {
-       url.removeClass("is-danger");
-    }
+      // highlight missing upload or web field
+      if (!url.val() && !cv.val()) {
+        url.addClass("is-danger");
+      } else {
+        url.removeClass("is-danger");
+      }
 
-    // highlight missing name
-    if (!name.val()){
-      name.addClass("is-danger");
-    } else {
-      name.removeClass("is-danger");
-    }
+      // form status
+      const isValid = !!(url.val() || cv.val());
 
-    // highlight missing email
-    if (!email.val()){
-      email.addClass("is-danger");
-    } else {
-      email.removeClass("is-danger");
-    }
+      return isValid;
+    });
 
-    // form status
-    const isValid = !!name.val() && !!email.val() && !!(url.val() || cv.val())
+    $('input[type="file"]').change(function (e) {
+      const filename = e.target.files.length ? e.target.files[0].name : "";
 
-    return isValid;
-  })
-
-  $('input[type="file"]').change(function(e){
-    const filename = e.target.files.length ? e.target.files[0].name : "";
-    
-    // update file name
-    $(".file-name").text(filename);
-  })
-})
+      // update file name
+      $(".file-name").text(filename);
+    });
+  });
 </script>
 {% endblock %}
 
 {% block body %}
 <section class="hero is-info is-fullheight">
   <div class="hero-head">
-    <nav class="navbar">
+    <nav class="navbar is-info">
       <div class="container">
         <div class="navbar-brand">
-            <a class="logo" href="/">
-              <img src="/static/logo.png"">
-            </a>
-            <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-            </a>
+          <a class="logo" href="/"> <img src="/static/logo.png""> </a>
+          <a
+            role="button"
+            class="navbar-burger"
+            data-target="navMenu"
+            aria-label="menu"
+            aria-expanded="false"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
         </div>
-        <div class="navbar-menu"  id="navMenu">
+        <div class="navbar-menu" id="navMenu">
           <div class="navbar-end">
-            <a class="navbar-item" id="btn-about">
-                About
+            <a class="navbar-item" id="btn-about"> About </a>
+            <a
+              class="navbar-item"
+              href="https://github.com/skdcodes/Artist-CV-Parser.Python_Flask_AWS-Textract_AWS-Comprehend.Web.Freelancer"
+            >
+              <i class="fab fa-github"></i> Source
             </a>
           </div>
         </div>
@@ -123,77 +116,56 @@ $(document).ready(function(){
 
   <div class="hero-body">
     <div class="container has-text-centered">
-      <p class="title">
-        Import your CV - for Visual Artists
-      </p>
+      <p class="title">Upload a Visual Artist CV</p>
       <p class="subtitle">
-        Test with
+        Or test with a
         <a
-          href="{{ url_for('process', filename='sample1.pdf', name='John Doe', email='johndoe@artgallery.com', is_artist=False) }}"
+          href="{{ url_for('process', filename='sample1.pdf') }}"
           target="new"
-          style="text-decoration: underline;"
+          style="text-decoration: underline"
           >Sample 1</a
         >
         and
         <a
-          href="{{ url_for('process', filename='sample2.pdf', name='Mary Jane', email='maryjane@artgallery.com', is_artist=False) }}"
+          href="{{ url_for('process', filename='sample2.pdf') }}"
           target="new"
-          style="text-decoration: underline;"
+          style="text-decoration: underline"
           >Sample 2</a
         >
       </p>
-      <form method="post" action="{{ url_for('save') }}" enctype="multipart/form-data">
-        <div class="field">
-          <p class="control has-icons-left">
-            <input class="input" type="text" name="name" placeholder="Artist Name" />
-            <span class="icon is-small is-left">
-              <i class="fas fa-user"></i>
-            </span>
-          </p>
-        </div>
-        <div class="field">
-          <p class="control has-icons-left">
-            <input class="input" type="text" name="email" placeholder="Artist Email" />
-            <span class="icon is-small is-left">
-              <i class="fas fa-at"></i>
-            </span>
-          </p>
-        </div>
+      <div class="py-5"></div>
+      <form
+        method="post"
+        action="{{ url_for('save') }}"
+        enctype="multipart/form-data"
+      >
         <div class="field">
           <div class="file has-name is-right">
             <label class="file-label flex-grow">
-              <input class="file-input" type="file" name="cv">
+              <input class="file-input" type="file" name="cv" />
               <span class="file-cta">
                 <span class="file-icon">
                   <i class="fas fa-upload"></i>
                 </span>
-                <span class="file-label">
-                  Upload a CV
-                </span>
+                <span class="file-label"> Upload a CV </span>
               </span>
-              <span class="file-name flex-grow">
-                My_resume.pdf
-              </span>
+              <span class="file-name flex-grow"> My_resume.pdf </span>
             </label>
           </div>
         </div>
-        
         <div class="is-divider" data-content="OR"></div>
         <div class="field">
           <p class="control has-icons-left">
-            <input class="input" type="text" name="url" placeholder="http://melissasmith.net.au/cv.html" />
+            <input
+              class="input"
+              type="text"
+              name="url"
+              placeholder="http://www.aaronkinnane.com/cv"
+            />
             <span class="icon is-small is-left">
               <i class="fas fa-globe"></i>
             </span>
           </p>
-        </div>
-        <div class="field">
-          <div class="control">
-            <label class="checkbox">
-              <input type="checkbox" name="is_artist">
-              I am the artist or their agent.
-            </label>
-          </div>
         </div>
         <div class="field">
           <div class="control">
@@ -204,5 +176,4 @@ $(document).ready(function(){
     </div>
   </div>
 </section>
-
 {% endblock %}}

@@ -1,10 +1,12 @@
-{% extends "base.jinja2" %} {% block title %} Result {% endblock %} {% block
-head %}
+{% extends "components/base.jinja2" %} 
+{% block title %} Result {% endblock %} 
+{% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-{% endblock %} {% block css %}
+{% endblock %} 
+{% block css %}
 <style>
   .status {
-      margin-bottom: 1rem;
+    margin-bottom: 1rem;
   }
 
   .results-download {
@@ -12,106 +14,88 @@ head %}
     margin-bottom: 3rem;
   }
 
-  .results-parsed-title,.results-saved-title {
-      margin-bottom:3rem;
-      padding-left:0.75rem;text-align:center;
-      font-weight: bold;
-      color: #7a7a7a;
-      font-weight: normal;
+  .results-parsed-title,
+  .results-saved-title {
+    margin-bottom: 3rem;
+    padding-left: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+    color: #7a7a7a;
+    font-weight: normal;
   }
-
 
   ol.exhibitions {
-      margin-left: 0.75rem;
-      list-style-type: none;
+    margin-left: 0.75rem;
+    list-style-type: none;
   }
   ol.exhibitions > li {
-      font-size: 0.75rem;
+    font-size: 0.75rem;
   }
 
   td {
-      border: 0 !important;
+    border: 0 !important;
   }
 
-  .artist-solo-exhibitions-list, .artist-group-exhibitions-list {
-      visibility: collapse;
+  .artist-solo-exhibitions-list,
+  .artist-group-exhibitions-list {
+    visibility: collapse;
   }
-
 
   .placeholder {
-      background: hsl(0, 0%, 91%) !important;
-      color: transparent;
+    background: hsl(0, 0%, 91%) !important;
+    color: transparent;
   }
 
   .highlight {
-      background-color:yellow;
+    background-color: yellow;
   }
 
   .file-location tr > td:nth-child(2) {
-      vertical-align:middle;
-      {# font-size: 12px; #}
+    vertical-align: middle;
   }
 
   .loading {
-  font-size: 30px;
+    font-size: 30px;
   }
 
   .loading:after {
-  overflow: hidden;
-  display: inline-block;
-  vertical-align: bottom;
-  -webkit-animation: ellipsis steps(4,end) 900ms infinite;
-  animation: ellipsis steps(4,end) 900ms infinite;
-  content: "\2026"; /* ascii code for the ellipsis character */
-  width: 0px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+    -webkit-animation: ellipsis steps(4, end) 900ms infinite;
+    animation: ellipsis steps(4, end) 900ms infinite;
+    content: "\2026"; /* ascii code for the ellipsis character */
+    width: 0px;
   }
 
   @keyframes ellipsis {
-  to {
+    to {
       width: 1.25em;
-  }
+    }
   }
 
   @-webkit-keyframes ellipsis {
-  to {
+    to {
       width: 1.25em;
-  }
+    }
   }
 </style>
-{% endblock %} {% block js %}
+{% endblock %} 
+
+{% block js %}
 <script>
   // found atleast one exhibition
   let found = false;
+  let bucket_name = {{ bucket_name|tojson|safe }};
+  let bucket_region = {{ bucket_region|tojson|safe }};
 
   // socketio instance
   const socket = io();
 
-  // get ip adress
-  function get_ip(){
-    const response = $.ajax({
-        type: "GET",
-        url: "https://www.cloudflare.com/cdn-cgi/trace",
-        async: false
-    }).responseText;
-    
-    const regex = new RegExp(/^ip=(.*)$/, "m");
-    
-    // ip not found
-    if (!regex.test(response)) return null;
-
-    return regex.exec(response)[1]
-  }
-
-  
-
   // socketio connected
   socket.on("connect", function () {
     socket.emit("job:start", {
-      filename: {{ filename|tojson|safe }}, 
-      name: {{ name|tojson|safe }}, 
-      email: {{ email|tojson|safe }},
-      is_artist: {{ is_artist|tojson|safe }},
-      ip: get_ip(),
+      filename: {{ filename|tojson|safe }},
     });
 
     // update status-title
@@ -179,26 +163,29 @@ head %}
     // file details
     if (code === "uploaded:cv") {
       $(".file-location-cv > td:nth-child(2)").html(
-        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../cv.pdf</a>`
+        `<a href="https://s3.${bucket_region}.amazonaws.com/${bucket_name}/${info}" target="_blank">https://s3.${bucket_region}.amazonaws.com/${bucket_name}/cvs/.../cv.pdf</a>`
       );
     }
     if (code === "uploaded:textract") {
       $(".file-location-textract > td:nth-child(2)").html(
-        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../textract.json</a>`
+        `<a href="https://s3.${bucket_region}.amazonaws.com/${bucket_name}/${info}" target="_blank">https://s3.${bucket_region}.amazonaws.com/${bucket_name}/cvs/.../textract.json</a>`
       );
     }
     if (code === "uploaded:parsed_json") {
       $(".file-location-parsed-json > td:nth-child(2)").html(
-        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../parsed.json</a>`
+        `<a href="https://s3.${bucket_region}.amazonaws.com/${bucket_name}/${info}" target="_blank">https://s3.${bucket_region}.amazonaws.com/${bucket_name}/cvs/.../parsed.json</a>`
       );
     }
     if (code === "uploaded:parsed_pdf") {
       $(".file-location-parsed-pdf > td:nth-child(2)").html(
-        `<a href="https://artex-staging.s3.amazonaws.com/${info}" target="_blank">https://artex-staging.s3.amazonaws.com/cvs/.../parsed.pdf</a>`
+        `<a href="https://s3.${bucket_region}.amazonaws.com/${bucket_name}/${info}" target="_blank">https://s3.${bucket_region}.amazonaws.com/${bucket_name}/cvs/.../parsed.pdf</a>`
       );
 
-      $(".results-download-link").attr("href", `{{ url_for('static', filename='uploads/') }}${meta.filename}`)
-      $(".results-download-link").attr("download", {{ name|tojson|safe }})
+      $(".results-download-link").attr(
+        "href",
+        `{{ url_for('static', filename='uploads/') }}${meta.filename}`
+      );
+      $(".results-download-link").attr("download", meta.filename);
     }
   });
 
@@ -223,35 +210,45 @@ head %}
     }
 
     // update exhbitions
-    if ($(".artist-solo-exhibitions-list ol").is(':empty')){
-        $(".artist-solo-exhibitions > td:nth-child(2)").text("Not found.")
+    if ($(".artist-solo-exhibitions-list ol").is(":empty")) {
+      $(".artist-solo-exhibitions > td:nth-child(2)").text("Not found.");
     }
 
-    if ($(".artist-group-exhibitions-list ol").is(':empty')){
-        $(".artist-group-exhibitions > td:nth-child(2)").text("Not found.")
+    if ($(".artist-group-exhibitions-list ol").is(":empty")) {
+      $(".artist-group-exhibitions > td:nth-child(2)").text("Not found.");
     }
 
     // close
     socket.disconnect();
   });
 </script>
-{% endblock %} {% block body %}
+{% endblock %} 
+
+{% block body %}
 <nav class="navbar is-info">
   <div class="container">
     <div class="navbar-brand">
-        <a class="logo" href="/">
-          <img src="/static/logo.png"">
-        </a>
-        <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
+      <a class="logo" href="/"> <img src="/static/logo.png""> </a>
+      <a
+        role="button"
+        class="navbar-burger"
+        data-target="navMenu"
+        aria-label="menu"
+        aria-expanded="false"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
     </div>
-    <div class="navbar-menu"  id="navMenu">
+    <div class="navbar-menu" id="navMenu">
       <div class="navbar-end">
-        <a class="navbar-item" id="btn-about">
-            About
+        <a class="navbar-item" id="btn-about"> About </a>
+        <a
+          class="navbar-item"
+          href="https://github.com/skdcodes/Artist-CV-Parser.Python_Flask_AWS-Textract_AWS-Comprehend.Web.Freelancer"
+        >
+          <i class="fab fa-github"></i> Source
         </a>
       </div>
     </div>
@@ -281,7 +278,7 @@ head %}
           <div class="upload-pdf">
             <embed
               src="{{ url_for('static', filename='uploads/%s' % filename) }}"
-              style="width: 100%; height: 100%; min-height: 640px;"
+              style="width: 100%; height: 100%; min-height: 640px"
               type="application/pdf"
             />
           </div>
@@ -290,7 +287,11 @@ head %}
       <div class="column">
         <div class="results">
           <div class="results-download">
-            <a class="results-download-link button is-success is-large is-fullwidth" href="#" download="#">
+            <a
+              class="results-download-link button is-success is-large is-fullwidth"
+              href="#"
+              download="#"
+            >
               <span class="icon">
                 <i class="fas fa-download"></i>
               </span>
@@ -298,9 +299,7 @@ head %}
             </a>
           </div>
           <div class="results-parsed box">
-            <div class="results-parsed-title">
-              EXTRACTION DETAILS
-            </div>
+            <div class="results-parsed-title">EXTRACTION DETAILS</div>
             <table class="artist table is-fullwidth">
               <tbody>
                 <tr class="artist-hash">
@@ -338,17 +337,15 @@ head %}
           </div>
 
           <div class="results-saved box">
-            <div class="results-saved-title">
-              FILE DETAILS
-            </div>
+            <div class="results-saved-title">FILE STORAGE DETAILS</div>
             <table class="file-location table is-fullwidth">
               <tbody>
                 <tr class="file-location-cv">
-                  <td><b>CV</b></td>
+                  <td><b>Original CV</b></td>
                   <td><span class="placeholder">Not determined.</span></td>
                 </tr>
                 <tr class="file-location-textract">
-                  <td><b>Textract</b></td>
+                  <td><b>Textract JSON</b></td>
                   <td><span class="placeholder">Not determined.</span></td>
                 </tr>
                 <tr class="file-location-parsed-json">
@@ -367,5 +364,4 @@ head %}
     </div>
   </div>
 </section>
-
 {% endblock %}}
