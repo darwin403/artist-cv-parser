@@ -10,7 +10,7 @@ setup(
     install_requires=[
         "python-dotenv",
         "boto3",
-        "Flask",
+        "Flask>=1.1.2",
         "flask-socketio",
         "selenium",
         "webdriver_manager",

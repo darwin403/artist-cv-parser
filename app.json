@@ -9,7 +9,18 @@
     },
     { "url": "https://github.com/chap/wkhtmltopdf-heroku-18-buildpack" }
   ],
-  "scripts": {
-    "postdeploy": "python web/app.py"
+  "env": {
+    "AWS_ACCESS_KEY_ID": {
+      "description": "Your AWS Access Key ID. This key must have access to S3, Textract and Comprehend"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "Your AWS Secret Access Key"
+    },
+    "AWS_BUCKET_NAME": {
+      "description": "The AWS Bucket name to save static uploaded and parsed files"
+    },
+    "AWS_REGION_NAME": {
+      "description": "The AWS bucket location for the above bucket."
+    }
   }
 }
