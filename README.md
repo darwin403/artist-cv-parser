@@ -11,16 +11,23 @@
 
 # Development
 
-You require Python 3.6 or greater. First clone the repository and change directory to the project folder. Then run the following:
+You require Python 3.6 or greater. First clone the repository and change directory to the project folder. Then create a virtual environment:
 
 ```bash
-python setup.py develop
+python3 -m virtualenv .venv
+source .venv/bin/activate
 ```
 
-This installs all the necessary dependencies to run the python project. You can now launch the web application by running:
+Now, run the following:
 
 ```bash
-python web/app.py
+python3 setup.py develop
+```
+
+This installs all the necessary dependencies to run the python project. Now, lets launch the web application by running:
+
+```bash
+python3 web/app.py
 ```
 
 You can now view the application at [http://localhost:5000](localhost:5000)

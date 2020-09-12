@@ -9,6 +9,8 @@
         "getenv",
         "postdeploy",
         "socketio",
+        "venv",
+        "virtualenv",
         "werkzeug"
     ],
     "python.formatting.provider": "black"
