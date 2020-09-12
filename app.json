@@ -1,0 +1,15 @@
+{
+  "name": "Artbiogs",
+  "description": "A web application that uses AI/ML to detect Artist's Exhibition details from a CV.",
+  "repository": "https://github.com/skdcodes/Artist-CV-Parser.Python_Flask_AWS-Textract_AWS-Comprehend.Web.Freelancer",
+  "image": "heroku/python",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome.git"
+    },
+    { "url": "https://github.com/chap/wkhtmltopdf-heroku-18-buildpack" }
+  ],
+  "scripts": {
+    "postdeploy": "python web/app.py"
+  }
+}

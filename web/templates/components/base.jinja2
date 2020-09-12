@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" />
+
+  <title>{% block title %}{% endblock %} | Art Biographies</title>
+
+  <!-- Load site-wide libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/js/all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-compat/3.0.0-alpha1/jquery.min.js"></script>
+  
+  <!-- Custom CSS, JS -->
+  <style>
+    nav {
+      background-color: #238cd1;
+    }
+    .logo {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+    }
+    .logo > img {
+      max-width: 145px;
+      height: auto;
+    }
+    .logo:hover {
+      background-color: #238cd1;
+    }
+    svg.svg-inline--fa {
+      margin-right: 0.5rem;
+    }
+  </style>
+  {% block head %}{% endblock %}
+  {% block css %}{% endblock %}
+  {% block js %}{% endblock %}
+</head>
+
+<body>
+  {% block body %}{% endblock %}
+
+  <!-- About -->
+  <div class="modal" id="modal-about">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">About</p>
+        <button class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        This website uses AI/ML to automatically parse an Artist's CV and the
+        extracts: Name, DOB and Exhbition Titles. All the exhibition titles under
+        <code>Solo Exhbitions</code> and <code>Group Exhbitions</code> are
+        extracted from the CV.
+        <b>The CV does NOT have to be in any particular format.</b>
+        <p class="my-5">
+          The following Machine Learning/AI Cloud technologies are used:
+        </p>
+        <ul class="content">
+          <li><b>AWS S3</b> - Content storage</li>
+          <li><b>AWS Textract</b> - Text extraction</li>
+          <li><b>AWS Comprehend</b> - Title extraction</li>
+        </ul>
+      </section>
+      <footer class="modal-card-foot"></footer>
+    </div>
+  </div>
+</body>
+
+<script>
+  // Handle About click
+  $("#btn-about").click(function () {
+    $(".modal").addClass("is-active");
+  });
+
+  // Handle Modal close
+  $('.modal [aria-label="close"]').click(function () {
+    $(this).closest(".modal").removeClass("is-active");
+  });
+
+  // Handle Navbar burger
+  // Get all "navbar-burger" elements
+  const $navbarBurgers = Array.prototype.slice.call(
+    document.querySelectorAll(".navbar-burger"),
+    0
+  );
+
+  // Check if there are any navbar burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach((el) => {
+      el.addEventListener("click", () => {
+        // Get the target from the "data-target" attribute
+        const target = el.dataset.target;
+        const $target = document.getElementById(target);
+
+        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+        el.classList.toggle("is-active");
+        $target.classList.toggle("is-active");
+      });
+    });
+  }
+</script>
+
+</html>

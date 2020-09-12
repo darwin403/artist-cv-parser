@@ -1,0 +1,15 @@
+{
+    "python.pythonPath": "/home/skd/Work/bot-python-cvs/.venv/bin/python3.6",
+    "cSpell.words": [
+        "artbiogs",
+        "boto",
+        "botocore",
+        "buildpacks",
+        "dotenv",
+        "getenv",
+        "postdeploy",
+        "socketio",
+        "werkzeug"
+    ],
+    "python.formatting.provider": "black"
+}
