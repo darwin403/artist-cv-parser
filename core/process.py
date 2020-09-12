@@ -32,9 +32,6 @@ class Parser:
         self.emit = config.get("emit", None)
         self.meta = config.get("meta", {})
 
-    def now(self):
-        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     def dispatch(self, code, service, status, info=None, meta=None):
         result = {
             "code": code,
@@ -203,20 +200,9 @@ class Parser:
         return result
 
     def process_cv(self, file_path):
-        now = self.now()
 
         # cv meta
-        meta = {
-            "hash": None,
-            "input": {
-                "name": self.meta.get("input", {}).get("name", "").title() or None,
-                "email": self.meta.get("input", {}).get("email"),
-                "is_artist": self.meta.get("input", {}).get("is_artist", False),
-            },
-            "ip": self.meta.get("ip"),
-            "createdAt": now,
-            "parsedAt": now,
-        }
+        meta = {"hash": None}
 
         # identify file uniquely by content
         file_hash = hashlib.md5(open(file_path, "rb").read()).hexdigest()
@@ -269,13 +255,7 @@ class Parser:
 
         # extract information from text
         result = self.process_blocks(blocks)
-        self.dispatch("welp", "script", "Processing CV completed.")
-
-        # update timestamps
-        meta["parsedAt"] = self.now()
-
-        # append meta
-        result["meta"] = meta
+        self.dispatch("welp", "script", "Exhibition extraction completed.")
 
         # save parsed pdf
         parsed_path = Path(file_path).parent / (Path(file_path).stem + "-parsed.pdf")

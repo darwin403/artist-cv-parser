@@ -4,8 +4,6 @@
 
 ![](screenshot.gif)
 
-Watch a demo or view how the final parsed cv.
-
 # Deploy
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)

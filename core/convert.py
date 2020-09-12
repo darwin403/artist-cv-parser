@@ -54,7 +54,13 @@ def web2pdf(url, path):
 
 # Convert html to pdf
 def html2pdf(html, path):
-    configuration = pdfkit.configuration()
+    WKHTMLTOPDF_PATH = os.environ.get("WKHTMLTOPDF_PATH")
+
+    # decide wkhtmltopdf path
+    if WKHTMLTOPDF_PATH:
+        configuration = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+    else:
+        configuration = pdfkit.configuration()
 
     pdfkit.from_string(html, path, configuration=configuration)
     return path
