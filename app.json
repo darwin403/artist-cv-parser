@@ -10,7 +10,7 @@
     { "url": "https://github.com/chap/wkhtmltopdf-heroku-18-buildpack" }
   ],
   "scripts": {
-    "postdeploy": "python3 setup.py install"
+    "postdeploy": "python setup.py install"
   },
   "env": {
     "AWS_ACCESS_KEY_ID": {

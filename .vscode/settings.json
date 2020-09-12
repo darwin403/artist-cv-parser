@@ -11,7 +11,8 @@
         "socketio",
         "venv",
         "virtualenv",
-        "werkzeug"
+        "werkzeug",
+        "wkhtmltopdf"
     ],
     "python.formatting.provider": "black"
 }

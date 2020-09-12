@@ -54,13 +54,7 @@ def web2pdf(url, path):
 
 # Convert html to pdf
 def html2pdf(html, path):
-    WKHTMLTOPDF_PATH = os.environ.get("WKHTMLTOPDF_PATH")
-
-    # decide wkhtmltopdf path
-    if WKHTMLTOPDF_PATH:
-        configuration = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
-    else:
-        configuration = pdfkit.configuration()
+    configuration = pdfkit.configuration()
 
     pdfkit.from_string(html, path, configuration=configuration)
     return path
@@ -253,7 +247,9 @@ if __name__ == "__main__":
             },
         ],
         "group_exhibitions": [],
-        "meta": {"hash": "3727bc7c83af26d08cc00cd9f6e3ddd0",},
+        "meta": {
+            "hash": "3727bc7c83af26d08cc00cd9f6e3ddd0",
+        },
     }
 
     data2pdf(data, "cv-parsed.pdf")
