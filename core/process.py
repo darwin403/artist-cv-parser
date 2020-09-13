@@ -204,8 +204,12 @@ class Parser:
         # cv meta
         meta = {"hash": None}
 
+        print('before hashhhhhhhhhhhhhhh')
+
         # identify file uniquely by content
         file_hash = hashlib.md5(open(file_path, "rb").read()).hexdigest()
+        print('after hashhhhhhhhhhhhhhh', file_hash)
+
         meta["hash"] = file_hash
         self.dispatch("file:hash", "hash", "File hash computed.", file_hash)
 

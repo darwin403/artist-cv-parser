@@ -92,6 +92,8 @@ def job_start(job):
 
     # parse cv
     parser = Parser(emit=emit)
+    print ('FILEEEEEEEEEEEEEPATH:', filepath)
+    print ('EMITTTTTTTTTTTT:', emit)
     parser.process_cv(filepath)
 
     # file processing done
