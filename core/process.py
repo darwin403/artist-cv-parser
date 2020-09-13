@@ -256,6 +256,9 @@ class Parser:
         # extract information from text
         result = self.process_blocks(blocks)
 
+        # append meta information
+        result["meta"] = meta
+
         # save parsed pdf
         self.dispatch("welp", "script", "Generating Parsed PDF.")
         parsed_path = Path(file_path).parent / (Path(file_path).stem + "-parsed.pdf")

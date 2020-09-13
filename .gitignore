@@ -6,4 +6,3 @@ __pycache__
 
 # user generated
 .env.local
-web/static/uploads/
